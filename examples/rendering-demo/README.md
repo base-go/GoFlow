@@ -16,17 +16,27 @@ A demonstration of the GoFlow rendering engine using the native macOS backend.
 
 **macOS only:**
 
+### Quick Run (Recommended)
 ```bash
 cd examples/rendering-demo
-go run main.go
+./build-app.sh
+open RenderingDemo.app
 ```
 
-Or build and run:
-
+### Manual Build
 ```bash
-go build -o rendering-demo
-./rendering-demo
+# Build the binary
+go build -o rendering-demo main.go
+
+# Create app bundle
+mkdir -p RenderingDemo.app/Contents/MacOS
+cp rendering-demo RenderingDemo.app/Contents/MacOS/RenderingDemo
+
+# Run it
+open RenderingDemo.app
 ```
+
+**⚠️ Important:** macOS GUI apps must be run as .app bundles to display windows properly. Running the raw executable from terminal (`./rendering-demo`) won't show the window - this is a macOS requirement for GUI applications.
 
 ## What You'll See
 
