@@ -157,6 +157,74 @@ btn := cupertino.NewButton(child, onPressed)
 
 See [DESIGN_SYSTEMS.md](DESIGN_SYSTEMS.md) for complete documentation.
 
+## Available Widgets
+
+GoFlow includes a comprehensive set of widgets inspired by Flutter:
+
+### Layout Widgets
+- **Column/Row**: Vertical/horizontal layout
+- **Stack**: Layered widgets
+- **Positioned**: Position children within Stack
+- **Align**: Align child within parent
+- **Container**: Padding, margin, sizing, colors
+- **Center**: Center child widget
+- **Padding**: Add padding around child
+- **SizedBox**: Fixed size container
+- **Expanded/Flexible**: Flex children in Row/Column
+- **Spacer**: Empty space in flex layouts
+
+### Form Widgets
+- **TextField** (Material/Cupertino): Text input
+- **Checkbox**: Material checkbox
+- **Radio**: Material radio button
+- **Switch** (Material/Cupertino): Toggle switch
+- **Slider** (Material/Cupertino): Value slider
+
+### Button Widgets
+- **Button** (Material/Cupertino): Primary buttons
+- **TextButton**: Text-only button (Material)
+- **OutlinedButton**: Outlined button (Material)
+- **IconButton**: Button with icon
+- **FloatingActionButton**: Material FAB
+
+### Display Widgets
+- **Text**: Display text
+- **Icon**: Display icons
+- **Image**: Display images
+
+### Scrolling Widgets
+- **ListView**: Scrollable list
+- **ListView.builder**: Lazy-loaded list
+- **GridView**: Scrollable grid
+- **SingleChildScrollView**: Scrollable single child
+
+### Interaction Widgets
+- **GestureDetector**: Detect gestures
+- **InkWell**: Material ink splash effect
+- **Draggable**: Make widget draggable
+- **DragTarget**: Accept draggable widgets
+
+### App Structure
+- **Scaffold** (Material): Basic app structure
+- **AppBar** (Material): Top app bar
+- **Drawer**: Side navigation drawer
+- **BottomNavigationBar**: Bottom navigation
+- **CupertinoPageScaffold**: iOS app structure
+- **CupertinoNavigationBar**: iOS navigation bar
+- **CupertinoTabScaffold**: iOS tabbed interface
+
+### Material-Specific
+- **Card**: Material card
+- **ListTile**: List item with leading/trailing
+- **Dialog**: Material dialog
+- **AlertDialog**: Alert dialog with actions
+- **DrawerHeader**: Drawer header
+
+### Cupertino-Specific
+- **CupertinoTextField**: iOS text field
+- **CupertinoSwitch**: iOS switch
+- **CupertinoSlider**: iOS slider
+
 ## Examples
 
 See the [examples](examples/) directory for more complete examples:
@@ -172,6 +240,7 @@ See the [examples](examples/) directory for more complete examples:
 - [Adaptive Demo](examples/adaptive-demo/) - Platform-adaptive widgets
 - [Material Demo](examples/material-demo/) - Material Design widgets
 - [Cupertino Demo](examples/cupertino-demo/) - iOS/macOS widgets
+- [Widgets Showcase](examples/widgets-showcase/) - Comprehensive widget demonstration
 
 ## Performance
 
