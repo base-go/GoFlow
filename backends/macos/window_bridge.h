@@ -8,6 +8,9 @@ extern "C" {
 // Window management
 typedef void* WindowHandle;
 
+// Application initialization
+void initApp(void);
+
 WindowHandle createWindow(int width, int height, const char* title);
 void destroyWindow(WindowHandle window);
 void showWindow(WindowHandle window);

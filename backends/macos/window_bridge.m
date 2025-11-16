@@ -3,6 +3,16 @@
 #include "cgo_bridge.h"
 #include <stdlib.h>
 
+// Initialize the Cocoa application
+void initApp(void) {
+    @autoreleasepool {
+        [NSApplication sharedApplication];
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        [NSApp activateIgnoringOtherApps:YES];
+        [NSApp finishLaunching];
+    }
+}
+
 // Custom view that handles drawing
 @interface GoFlowView : NSView {
     void* graphicsContext;

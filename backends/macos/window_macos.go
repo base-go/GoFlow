@@ -277,8 +277,7 @@ func (w *Window) SetResizeFunc(fn ResizeFunc) {
 // InitApp initializes the Cocoa application
 // This must be called before creating any windows
 func InitApp() {
-	// Initialize NSApplication (happens automatically in Objective-C runtime)
-	// We just need to ensure we're on the main thread
+	C.initApp()
 }
 
 //export goDrawCallback
