@@ -45,6 +45,8 @@ examples/adaptive-demo/adaptive-demo
 examples/cupertino-demo/cupertino-demo
 examples/input-widgets/input-widgets
 examples/stack-demo/stack-demo
+examples/hotreload-demo/hotreload-demo
+examples/hotreload-widget-demo/hotreload-widget-demo
 
 # Demo/template directories
 demo_flutter_for_template/
