@@ -139,7 +139,7 @@
 ```go
 - [x] TextField (single line - logic complete, needs cursor/selection rendering)
 - [ ] TextFormField (multi-line)
-- [ ] Button widgets (ElevatedButton, TextButton, OutlinedButton)
+- [x] Button widgets (ElevatedButton, TextButton, OutlinedButton, FAB)
 - [ ] Checkbox
 - [ ] Radio buttons
 - [ ] Switch
