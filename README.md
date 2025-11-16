@@ -2,6 +2,31 @@
 
 A Flutter-inspired GUI framework for Go with reactive state management and platform-adaptive design systems.
 
+## ✨ Single Import Architecture
+
+GoFlow uses a **single import path** for the best developer experience:
+
+```go
+import gf "github.com/base-go/GoFlow"
+
+func main() {
+    count := gf.CreateSignal(0)
+
+    app := gf.MaterialScaffold{
+        AppBar: gf.MaterialAppBar{Title: "Counter"},
+        Body: gf.Center{
+            Child: gf.Text{
+                Content: fmt.Sprintf("Count: %d", count.Get()),
+            },
+        },
+    }
+
+    gf.RunApp(app)
+}
+```
+
+> **Migrating from the old multi-import style?** See the [Migration Guide](./MIGRATION_GUIDE.md)
+
 ## 🚀 Quick Start
 
 ```bash
@@ -20,6 +45,7 @@ go run main.go
 
 ## 📚 Documentation
 
+- **[Migration Guide](./MIGRATION_GUIDE.md)** - Switch to single import architecture
 - **[Getting Started](./docs/GETTING_STARTED.md)** - Complete beginner tutorial
 - **[Architecture](./docs/ARCHITECTURE.md)** - Framework architecture deep dive
 - **[CLI Reference](./docs/CLI.md)** - Complete CLI documentation
@@ -73,16 +99,16 @@ go get github.com/base-go/GoFlow
 ## Signals Quick Start
 
 ```go
-import "github.com/base-go/GoFlow/pkg/core/signals"
+import gf "github.com/base-go/GoFlow"
 
 // Create signals
-counter := signals.New(0)
-doubled := signals.NewComputed(func() int {
+counter := gf.CreateSignal(0)
+doubled := gf.CreateComputed(func() int {
     return counter.Get() * 2
 })
 
 // React to changes
-dispose := signals.NewEffect(func() {
+dispose := gf.CreateEffect(func() {
     fmt.Printf("Counter: %d, Doubled: %d\n", counter.Get(), doubled.Get())
 })
 defer dispose()
