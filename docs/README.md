@@ -10,12 +10,27 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 - **[Project Structure](./PROJECT_STRUCTURE.md)** - Understanding GoFlow project layout
 
 ### Core Concepts
-- **[Architecture](../ARCHITECTURE.md)** - Framework architecture (widgets, elements, render objects)
+- **[Architecture](./ARCHITECTURE.md)** - Framework architecture (widgets, elements, render objects)
 - **[Rendering Architecture](./RENDERING.md)** - How rendering works (native backends vs WGPU)
 - **[Flutter Inspiration](./FLUTTER_INSPIRATION.md)** - Comparison with Flutter and migration guide
+- **[Design Systems](./DESIGN_SYSTEMS.md)** - Material, Cupertino, and Adaptive widgets
+
+### Widget Documentation
+- **[Widget Reference](./WIDGETS_REFERENCE.md)** - Complete catalog of all 27+ widgets
+- **[Layout Completion Summary](./LAYOUT_COMPLETION_SUMMARY.md)** - Layout system implementation details
+- **[Widget Examples](./widgets/)** - Detailed widget documentation by category
+
+### Developer Experience
+- **[Hot Reload](../pkg/hotreload/README.md)** - Hot reload system with state preservation
+- **[Testing Framework](../pkg/testing/README.md)** - Widget testing, golden tests, and integration testing
+- **[Navigation](../pkg/navigation/README.md)** - GetX-style navigation and routing
+- **[Input System](./INPUT_SYSTEM.md)** - Mouse, keyboard, and gesture handling
 
 ### Advanced Topics
 - **[Platform Integration](./PLATFORM_INTEGRATION.md)** - Native platform projects roadmap (Xcode, CMake, VS)
+- **[Development Status](./DEV_STATUS.md)** - Current development branch status
+- **[Progress Tracking](./PROGRESS.md)** - Detailed progress and roadmap
+- **[Workflow Guide](./WORKFLOW.md)** - Complete technical workflow
 
 ### Examples
 - **[Playground Example](../examples/playground/)** - Comprehensive framework feature test
@@ -29,7 +44,7 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 → Start with [Getting Started Guide](./GETTING_STARTED.md)
 
 #### ...understand how GoFlow works internally
-→ Read [Architecture](../ARCHITECTURE.md)
+→ Read [Architecture](./ARCHITECTURE.md)
 
 #### ...create a new project
 → See [CLI Documentation](./CLI.md#goflow-create)
@@ -40,11 +55,23 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 #### ...know how rendering works
 → Read [Rendering Architecture](./RENDERING.md)
 
+#### ...see all available widgets
+→ Browse [Widget Reference](./WIDGETS_REFERENCE.md)
+
+#### ...implement hot reload in my app
+→ Check [Hot Reload Guide](../pkg/hotreload/README.md)
+
+#### ...write tests for my widgets
+→ See [Testing Framework](../pkg/testing/README.md)
+
+#### ...add navigation to my app
+→ Read [Navigation Guide](../pkg/navigation/README.md)
+
 #### ...migrate from Flutter
 → See [Flutter Inspiration](./FLUTTER_INSPIRATION.md)
 
 #### ...contribute to GoFlow
-→ Check out [Platform Integration](./PLATFORM_INTEGRATION.md) for roadmap
+→ Check [Progress Tracking](./PROGRESS.md) for roadmap
 
 ## 📖 Documentation by Topic
 
@@ -55,11 +82,12 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 4. [Running your app](./GETTING_STARTED.md#step-4-run-your-app)
 
 ### Core Framework
-1. [Widgets](../ARCHITECTURE.md#1-widgets) - UI building blocks
-2. [Elements](../ARCHITECTURE.md#2-elements) - Lifecycle management
-3. [RenderObjects](../ARCHITECTURE.md#3-renderobjects) - Layout & painting
-4. [The Three Trees](../ARCHITECTURE.md#the-three-trees)
-5. [Layout System](../ARCHITECTURE.md#layout-system)
+1. [Widgets](./ARCHITECTURE.md#1-widgets) - UI building blocks
+2. [Elements](./ARCHITECTURE.md#2-elements) - Lifecycle management
+3. [RenderObjects](./ARCHITECTURE.md#3-renderobjects) - Layout & painting
+4. [The Three Trees](./ARCHITECTURE.md#the-three-trees)
+5. [Layout System](./ARCHITECTURE.md#layout-system)
+6. [Widget Reference](./WIDGETS_REFERENCE.md) - All available widgets
 
 ### State Management
 1. [Signals](../README.md#quick-start) - Reactive values
@@ -87,7 +115,9 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 2. [goflow create](./CLI.md#goflow-create)
 3. [Project Templates](./CLI.md#available-templates)
 4. [Platform Selection](./CLI.md#available-platforms)
-5. [Troubleshooting](./CLI.md#troubleshooting)
+5. [Hot Reload](../pkg/hotreload/README.md)
+6. [Testing Framework](../pkg/testing/README.md)
+7. [Troubleshooting](./CLI.md#troubleshooting)
 
 ## 🎯 Learning Paths
 
@@ -104,23 +134,35 @@ Welcome to the complete GoFlow documentation! This guide will help you navigate 
 4. Start building!
 
 ### Path 3: Framework Contributor
-1. Read [Architecture](../ARCHITECTURE.md) thoroughly
+1. Read [Architecture](./ARCHITECTURE.md) thoroughly
 2. Read [Rendering Architecture](./RENDERING.md)
-3. Review [Platform Integration](./PLATFORM_INTEGRATION.md) roadmap
-4. Check out the codebase structure
-5. Look for contribution opportunities
+3. Review [Progress Tracking](./PROGRESS.md) for roadmap
+4. Check [Development Status](./DEV_STATUS.md) for current state
+5. Review [Platform Integration](./PLATFORM_INTEGRATION.md) roadmap
+6. Check out the codebase structure
+7. Look for contribution opportunities
 
 ## 📝 Document Status
 
 | Document | Status | Version |
 |----------|--------|---------|
-| Getting Started | ✅ Complete | v0.1.0 |
-| CLI Documentation | ✅ Complete | v0.1.0 |
-| Project Structure | ✅ Complete | v0.1.0 |
-| Architecture | ✅ Complete | v0.1.0 |
-| Rendering | ✅ Complete | v0.1.0 |
-| Flutter Inspiration | ✅ Complete | v0.1.0 |
-| Platform Integration | ✅ Roadmap | v0.1.0 |
+| Getting Started | ✅ Complete | v0.2.0 |
+| CLI Documentation | ✅ Complete | v0.2.0 |
+| Project Structure | ✅ Complete | v0.2.0 |
+| Architecture | ✅ Complete | v0.2.0 |
+| Rendering | ✅ Complete | v0.2.0 |
+| Flutter Inspiration | ✅ Complete | v0.2.0 |
+| Design Systems | ✅ Complete | v0.2.0 |
+| Widget Reference | ✅ Complete | v0.2.0 |
+| Layout Summary | ✅ Complete | v0.2.0 |
+| Hot Reload | ✅ Complete | v0.2.0 |
+| Testing Framework | ✅ Complete | v0.2.0 |
+| Navigation | ✅ Complete | v0.2.0 |
+| Input System | ✅ Complete | v0.2.0 |
+| Progress Tracking | ✅ Complete | v0.2.0 |
+| Development Status | ✅ Complete | v0.2.0 |
+| Workflow Guide | ✅ Complete | v0.2.0 |
+| Platform Integration | ✅ Roadmap | v0.2.0 |
 
 ## 🔗 External Resources
 
@@ -171,12 +213,12 @@ Found an error? Have a suggestion? Want to improve the docs?
 ## 📅 What's Next?
 
 Upcoming documentation:
-- Hot Reload Guide (when implemented)
-- Event Handling Guide (when implemented)
 - Animation System Guide (when implemented)
-- Testing Guide
 - Performance Optimization Guide
 - Publishing & Distribution Guide
+- Advanced Gesture Handling
+- Custom Render Objects Guide
+- Plugin Development Guide
 
 ---
 
