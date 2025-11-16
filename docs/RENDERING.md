@@ -1,23 +1,32 @@
 # GoFlow Rendering Architecture
 
-**Current Status: ⚠️ Architecture Only - No Actual Rendering Yet**
+**Current Status: ✅ macOS Rendering Implemented!**
 
-GoFlow has the rendering **architecture** designed and implemented, but no actual rendering backend. This document explains how rendering will work and the options for implementation.
+GoFlow now has a working native rendering backend for macOS using Core Graphics! This document explains the rendering architecture and implementation details.
 
-## Current State (v0.1.0)
+## Current State (v0.2.0)
 
 ### What Exists ✅
 - **Canvas Interface**: Abstraction for drawing operations
 - **RenderObject System**: Layout and paint pipeline
 - **Widget → Element → RenderObject** chain
-- **MockCanvas**: Testing implementation only
+- **MockCanvas**: Testing implementation
+- **✨ macOS Backend**: Native Core Graphics rendering
+- **✨ Window Management**: Cocoa-based window creation
+- **✨ Text Rendering**: Core Text integration
+- **✨ Basic Shapes**: Rectangles, circles, lines
+- **✨ Event Loop**: macOS event handling
 
-### What Doesn't Exist ❌
-- **No Real Rendering Backend**: No actual pixels on screen
-- **No Window Creation**: Platform runners exist but don't create windows
-- **No GPU Integration**: No Metal/DirectX/Vulkan/OpenGL
-- **No Text Rendering**: No font rasterization
-- **No Image Loading**: No asset loading
+### What's In Progress ⏳
+- **Mouse Events**: Mouse click and movement handling
+- **Keyboard Events**: Keyboard input handling
+- **Image Loading**: Asset loading and rendering
+- **Advanced Shapes**: Paths, curves, gradients
+
+### Planned ⏭️
+- **Windows Backend**: Direct2D implementation
+- **Linux Backend**: Cairo implementation
+- **WGPU Backend**: Cross-platform GPU rendering
 
 ## Rendering Pipeline Architecture
 
@@ -451,14 +460,26 @@ func (c *CairoCanvas) DrawText(text string, offset *Offset, style *TextStyle) {
 ## Next Steps
 
 1. **✅ Document rendering architecture** (this doc)
-2. **⏳ Implement macOS Core Graphics backend**
-3. **⏳ Implement Windows Direct2D backend**
-4. **⏳ Implement Linux Cairo backend**
-5. **⏳ Add GLFW window creation**
-6. **⏳ Integrate event loop**
-7. **⏳ Add text rendering**
-8. **⏳ Add image loading**
-9. **⏳ WGPU backend (optional)**
+2. **✅ Implement macOS Core Graphics backend** - DONE! See `backends/macos/`
+3. **✅ Cocoa window creation** - DONE! Native macOS windows
+4. **✅ Integrate event loop** - DONE! Basic event polling
+5. **✅ Add text rendering** - DONE! Core Text integration
+6. **⏳ Add mouse/keyboard events** - In progress
+7. **⏳ Add image loading** - Planned
+8. **⏳ Implement Windows Direct2D backend** - Planned
+9. **⏳ Implement Linux Cairo backend** - Planned
+10. **⏳ WGPU backend (optional)** - Future consideration
+
+## Quick Start with macOS Backend
+
+See the [rendering demo example](../examples/rendering-demo/) for a complete example:
+
+```bash
+cd examples/rendering-demo
+go run main.go
+```
+
+For more details on using the macOS backend, see [`backends/macos/README.md`](../backends/macos/README.md).
 
 ## See Also
 
