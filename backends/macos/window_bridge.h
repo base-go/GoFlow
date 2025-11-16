@@ -10,6 +10,7 @@ typedef void* WindowHandle;
 
 // Application initialization
 void initApp(void);
+void runApp(void);
 
 WindowHandle createWindow(int width, int height, const char* title);
 void destroyWindow(WindowHandle window);

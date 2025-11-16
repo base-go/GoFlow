@@ -280,6 +280,12 @@ func InitApp() {
 	C.initApp()
 }
 
+// Run starts the Cocoa event loop (blocking)
+// This should be called after setting up windows
+func Run() {
+	C.runApp()
+}
+
 //export goDrawCallback
 func goDrawCallback(handle C.WindowHandle, userData unsafe.Pointer) {
 	windowRegistryMu.RLock()

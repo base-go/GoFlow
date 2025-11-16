@@ -1,0 +1,41 @@
+TEST-WINDOW (Works):
+==================
+Uses [NSApp run] - the standard Cocoa event loop
+
+void showTestWindow() {
+    [NSApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    NSWindow *window = [[NSWindow alloc] init...];
+    [window makeKeyAndOrderFront:nil];
+    [NSApp activateIgnoringOtherApps:YES];
+
+    [NSApp run];  // <-- BLOCKING CALL - runs macOS event loop
+}
+
+
+RENDERING-DEMO (Doesn't work):
+==============================
+Uses PollEvents() - custom Go event loop
+
+func main() {
+    macos.InitApp()
+    window := macos.NewWindow(800, 600, "GoFlow")
+    window.Show()
+
+    // Custom event loop
+    for !window.ShouldClose() {
+        window.PollEvents()      // <-- Polls events manually
+        window.SetNeedsDisplay()
+    }
+}
+
+void pollEvents(WindowHandle window) {
+    while ((event = [NSApp nextEventMatchingMask:NSEventMaskAny
+                                        untilDate:nil  // <-- nil = don't wait
+                                           inMode:NSDefaultRunLoopMode
+                                          dequeue:YES])) {
+        [NSApp sendEvent:event];
+        [NSApp updateWindows];
+    }
+}

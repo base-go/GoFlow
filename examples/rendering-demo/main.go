@@ -6,10 +6,18 @@ package main
 import (
 	"fmt"
 	"math"
+	"runtime"
+	"time"
 
 	"github.com/base-go/GoFlow/backends/macos"
 	"github.com/base-go/GoFlow/pkg/core/framework"
 )
+
+func init() {
+	// Cocoa requires all UI operations to happen on the main thread
+	// Lock the main goroutine to the main OS thread
+	runtime.LockOSThread()
+}
 
 func main() {
 	fmt.Println("GoFlow Rendering Demo - macOS")
@@ -66,18 +74,23 @@ func main() {
 		fmt.Printf("Window resized to: %dx%d\n", width, height)
 	})
 
+	// Set up animation timer
+	go func() {
+		ticker := time.NewTicker(16 * time.Millisecond) // ~60 FPS
+		defer ticker.Stop()
+		for range ticker.C {
+			window.SetNeedsDisplay()
+		}
+	}()
+
 	// Show window
 	window.Show()
 
 	fmt.Println("Window created and shown. Close the window to exit.")
 
-	// Event loop
-	for !window.ShouldClose() {
-		window.PollEvents()
-		window.SetNeedsDisplay()
-	}
-
-	fmt.Println("Demo finished!")
+	// Run the application
+	// This is a blocking call that runs the Cocoa event loop
+	macos.Run()
 }
 
 func drawRectangles(canvas *macos.CoreGraphicsCanvas) {

@@ -8,8 +8,13 @@ void initApp(void) {
     @autoreleasepool {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-        [NSApp activateIgnoringOtherApps:YES];
-        [NSApp finishLaunching];
+    }
+}
+
+// Run the Cocoa event loop (blocking)
+void runApp(void) {
+    @autoreleasepool {
+        [NSApp run];
     }
 }
 
@@ -45,6 +50,62 @@ void initApp(void) {
 
 - (BOOL)isFlipped {
     return YES; // Use top-left origin
+}
+
+- (BOOL)acceptsFirstResponder {
+    return YES; // Accept keyboard and mouse events
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSWindow *window = [self window];
+    GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[window delegate];
+
+    if (delegate.mouseCallback && delegate.mouseUserData) {
+        delegate.mouseCallback((__bridge WindowHandle)window, 0, 1, location.x, location.y, delegate.mouseUserData);
+    }
+}
+
+- (void)mouseUp:(NSEvent *)event {
+    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSWindow *window = [self window];
+    GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[window delegate];
+
+    if (delegate.mouseCallback && delegate.mouseUserData) {
+        delegate.mouseCallback((__bridge WindowHandle)window, 0, 0, location.x, location.y, delegate.mouseUserData);
+    }
+}
+
+- (void)mouseMoved:(NSEvent *)event {
+    NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSWindow *window = [self window];
+    GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[window delegate];
+
+    if (delegate.mouseCallback && delegate.mouseUserData) {
+        delegate.mouseCallback((__bridge WindowHandle)window, -1, 2, location.x, location.y, delegate.mouseUserData);
+    }
+}
+
+- (void)mouseDragged:(NSEvent *)event {
+    [self mouseMoved:event]; // Treat as mouse move while dragging
+}
+
+- (void)keyDown:(NSEvent *)event {
+    NSWindow *window = [self window];
+    GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[window delegate];
+
+    if (delegate.keyCallback && delegate.keyUserData) {
+        delegate.keyCallback((__bridge WindowHandle)window, [event keyCode], 1, delegate.keyUserData);
+    }
+}
+
+- (void)keyUp:(NSEvent *)event {
+    NSWindow *window = [self window];
+    GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[window delegate];
+
+    if (delegate.keyCallback && delegate.keyUserData) {
+        delegate.keyCallback((__bridge WindowHandle)window, [event keyCode], 0, delegate.keyUserData);
+    }
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -108,9 +169,17 @@ void initApp(void) {
 @interface GoFlowWindowDelegate : NSObject <NSWindowDelegate> {
     ResizeCallback resizeCallback;
     void* resizeUserData;
+    MouseCallback mouseCallback;
+    void* mouseUserData;
+    KeyCallback keyCallback;
+    void* keyUserData;
 }
 @property (nonatomic, assign) ResizeCallback resizeCallback;
 @property (nonatomic, assign) void* resizeUserData;
+@property (nonatomic, assign) MouseCallback mouseCallback;
+@property (nonatomic, assign) void* mouseUserData;
+@property (nonatomic, assign) KeyCallback keyCallback;
+@property (nonatomic, assign) void* keyUserData;
 @end
 
 @implementation GoFlowWindowDelegate
@@ -174,12 +243,17 @@ WindowHandle createWindow(int width, int height, const char* title) {
         // Create custom view
         GoFlowView *view = [[GoFlowView alloc] initWithFrame:frame];
         [window setContentView:view];
+        [window makeFirstResponder:view]; // Make view the first responder for events
 
         // Create graphics context for the view
         view.graphicsContext = createGraphicsContext(width, height);
 
         // Create and set delegate
         GoFlowWindowDelegate *delegate = [[GoFlowWindowDelegate alloc] init];
+        delegate.mouseCallback = NULL;
+        delegate.mouseUserData = NULL;
+        delegate.keyCallback = NULL;
+        delegate.keyUserData = NULL;
         [window setDelegate:delegate];
 
         return (__bridge_retained WindowHandle)window;
@@ -208,6 +282,9 @@ void showWindow(WindowHandle window) {
     @autoreleasepool {
         NSWindow *nsWindow = (__bridge NSWindow*)window;
         [nsWindow makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+        // Force a display update immediately
+        [nsWindow display];
     }
 }
 
@@ -242,14 +319,28 @@ void setWindowShouldClose(WindowHandle window, int shouldClose) {
 
 void pollEvents(WindowHandle window) {
     @autoreleasepool {
+        // Ensure app is activated (important for first frame)
+        if (![NSApp isActive]) {
+            [NSApp activateIgnoringOtherApps:YES];
+        }
+
+        // Process all pending events
         NSEvent *event;
+        NSDate *timeout = [NSDate dateWithTimeIntervalSinceNow:0.001]; // 1ms timeout
+
         while ((event = [NSApp nextEventMatchingMask:NSEventMaskAny
-                                           untilDate:nil
+                                           untilDate:timeout
                                               inMode:NSDefaultRunLoopMode
                                              dequeue:YES])) {
             [NSApp sendEvent:event];
-            [NSApp updateWindows];
+            timeout = [NSDate distantPast]; // After first event, process remaining immediately
         }
+
+        // Run the run loop briefly to allow window server updates
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.001]];
+
+        [NSApp updateWindows];
     }
 }
 
