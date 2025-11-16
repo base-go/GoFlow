@@ -1,6 +1,38 @@
 # GoFlow
 
-A reactive state management library for Go, inspired by signals pattern from Preact/Dart.
+A Flutter-inspired GUI framework for Go with reactive state management, inspired by signals pattern from Preact/Solid.js.
+
+## Quick Start
+
+```bash
+# Install the CLI
+go install github.com/base-go/GoFlow/cmd/goflow@latest
+
+# Create a new project (Flutter-style)
+goflow new myapp
+
+# Run it
+cd myapp/macos
+go run main.go
+```
+
+### Project Structure
+
+GoFlow follows Flutter's project structure philosophy:
+
+```
+myapp/
+├── lib/                    # Shared application code (like Flutter's lib/)
+│   └── main.go
+├── macos/                  # macOS platform runner
+├── linux/                  # Linux platform runner
+├── windows/                # Windows platform runner
+├── assets/                 # Images, fonts, icons
+├── test/                   # Tests
+├── goflow.yaml             # Project configuration (like pubspec.yaml)
+├── go.mod                  # Go dependencies
+└── README.md
+```
 
 ## Features
 

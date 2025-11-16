@@ -1,0 +1,95 @@
+package lib
+
+import (
+	"fmt"
+
+	"github.com/base-go/GoFlow/goflow"
+	"github.com/base-go/GoFlow/signals"
+	"github.com/base-go/GoFlow/widgets"
+)
+
+// {{.AppName}}App with Material Design style
+type {{.AppName}}App struct {
+	goflow.BaseWidget
+	counter *signals.Signal[int]
+	title   string
+}
+
+func New{{.AppName}}App() *{{.AppName}}App {
+	return &{{.AppName}}App{
+		counter: signals.New(0),
+		title:   "{{.ProjectName}}",
+	}
+}
+
+func (app *{{.AppName}}App) Build(ctx goflow.BuildContext) goflow.Widget {
+	count := app.counter.Get()
+
+	return &widgets.Container{
+		Color: goflow.NewColor(250, 250, 250, 255), // Light background
+		Child: widgets.NewCenter(
+			&widgets.Column{
+				Children: []goflow.Widget{
+					// App bar style header
+					&widgets.Container{
+						Color:   goflow.ColorBlue,
+						Padding: goflow.NewEdgeInsetsAll(20),
+						Child: widgets.NewTextWithStyle(
+							app.title,
+							&goflow.TextStyle{
+								Color:      goflow.ColorWhite,
+								FontSize:   24,
+								FontWeight: goflow.FontWeightBold,
+							},
+						),
+					},
+					spacer(40),
+					// Card-like container
+					&widgets.Container{
+						Color:   goflow.ColorWhite,
+						Padding: goflow.NewEdgeInsetsAll(32),
+						Child: &widgets.Column{
+							Children: []goflow.Widget{
+								widgets.NewTextWithStyle(
+									fmt.Sprintf("%d", count),
+									&goflow.TextStyle{
+										Color:      goflow.ColorBlue,
+										FontSize:   48,
+										FontWeight: goflow.FontWeightBold,
+									},
+								),
+								spacer(10),
+								widgets.NewTextWithStyle(
+									"Times clicked",
+									&goflow.TextStyle{
+										Color:    goflow.ColorGray,
+										FontSize: 16,
+									},
+								),
+							},
+							MainAxisAlign:  widgets.MainAxisCenter,
+							CrossAxisAlign: widgets.CrossAxisCenter,
+						},
+					},
+				},
+				MainAxisAlign:  widgets.MainAxisStart,
+				CrossAxisAlign: widgets.CrossAxisStretch,
+			},
+		),
+	}
+}
+
+func (app *{{.AppName}}App) Increment() {
+	app.counter.Update(func(v int) int { return v + 1 })
+}
+
+func spacer(height float64) goflow.Widget {
+	h := height
+	return &widgets.Container{Height: &h}
+}
+
+// Run is the main entry point called by platform runners
+func Run() {
+	app := New{{.AppName}}App()
+	goflow.RunApp(app)
+}

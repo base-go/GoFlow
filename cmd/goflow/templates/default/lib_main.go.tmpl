@@ -1,0 +1,72 @@
+package lib
+
+import (
+	"fmt"
+
+	"github.com/base-go/GoFlow/goflow"
+	"github.com/base-go/GoFlow/signals"
+	"github.com/base-go/GoFlow/widgets"
+)
+
+// {{.AppName}}App is the root widget
+type {{.AppName}}App struct {
+	goflow.BaseWidget
+	counter *signals.Signal[int]
+}
+
+// New{{.AppName}}App creates a new app instance
+func New{{.AppName}}App() *{{.AppName}}App {
+	return &{{.AppName}}App{
+		counter: signals.New(0),
+	}
+}
+
+// Build creates the widget tree
+func (app *{{.AppName}}App) Build(ctx goflow.BuildContext) goflow.Widget {
+	count := app.counter.Get()
+
+	return widgets.NewCenter(
+		&widgets.Column{
+			Children: []goflow.Widget{
+				widgets.NewTextWithStyle(
+					"Welcome to {{.ProjectName}}",
+					&goflow.TextStyle{
+						Color:      goflow.ColorBlue,
+						FontSize:   32,
+						FontWeight: goflow.FontWeightBold,
+					},
+				),
+				spacer(20),
+				widgets.NewText(fmt.Sprintf("Counter: %d", count)),
+				spacer(20),
+				widgets.NewTextWithStyle(
+					"Click + to increment",
+					&goflow.TextStyle{
+						Color:    goflow.ColorGray,
+						FontSize: 14,
+					},
+				),
+			},
+			MainAxisAlign:  widgets.MainAxisCenter,
+			CrossAxisAlign: widgets.CrossAxisCenter,
+		},
+	)
+}
+
+// Increment increments the counter
+func (app *{{.AppName}}App) Increment() {
+	app.counter.Update(func(v int) int { return v + 1 })
+}
+
+func spacer(height float64) goflow.Widget {
+	h := height
+	return &widgets.Container{
+		Height: &h,
+	}
+}
+
+// Run is the main entry point called by platform runners
+func Run() {
+	app := New{{.AppName}}App()
+	goflow.RunApp(app)
+}
