@@ -12,7 +12,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/base-go/GoFlow/goflow"
+	"github.com/base-go/GoFlow/pkg/core/framework"
 )
 
 // CoreGraphicsCanvas implements the Canvas interface using macOS Core Graphics

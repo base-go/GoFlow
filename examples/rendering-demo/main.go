@@ -1,3 +1,4 @@
+//go:build darwin
 // +build darwin
 
 package main
@@ -7,7 +8,7 @@ import (
 	"math"
 
 	"github.com/base-go/GoFlow/backends/macos"
-	"github.com/base-go/GoFlow/goflow"
+	"github.com/base-go/GoFlow/pkg/core/framework"
 )
 
 func main() {
@@ -155,15 +156,16 @@ func drawLines(canvas *macos.CoreGraphicsCanvas) {
 	canvas.DrawText("Lines with different colors", goflow.NewOffset(50, 395), labelStyle)
 }
 
-func drawAnimatedCircle(canvas *macos.CoreGraphicsCanvas) {
+func drawAnimatedCircle(canvas *macos.CoreGraphicsCanvas, frame int) {
 	// Animated bouncing circle
 	centerX := 550.0
 	centerY := 350.0
 	radius := 30.0
 
 	// Simple sine wave animation
-	offsetX := math.Sin(float64(0)) * 100
-	offsetY := math.Cos(float64(0)) * 50
+	t := float64(frame) * 0.05
+	offsetX := math.Sin(t) * 100
+	offsetY := math.Cos(t) * 50
 
 	paint := goflow.NewPaint()
 	paint.Color = goflow.NewColor(156, 39, 176, 255) // Purple

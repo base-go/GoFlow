@@ -53,7 +53,7 @@ package main
 
 import (
     "github.com/base-go/GoFlow/backends/macos"
-    "github.com/base-go/GoFlow/goflow"
+    "github.com/base-go/GoFlow/pkg/core/framework"
 )
 
 func main() {
