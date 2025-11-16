@@ -139,7 +139,7 @@
 ```go
 - [x] TextField (single line - logic complete, needs cursor/selection rendering)
 - [ ] TextFormField (multi-line)
-- [x] Button widgets (ElevatedButton, TextButton, OutlinedButton, FAB)
+- [~] Button widgets (Material buttons exist, need Cupertino variants)
 - [ ] Checkbox
 - [ ] Radio buttons
 - [ ] Switch
