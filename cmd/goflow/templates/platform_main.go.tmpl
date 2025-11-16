@@ -1,0 +1,29 @@
+package main
+
+import (
+	"fmt"
+	"runtime"
+
+	"{{.ModulePath}}/lib"
+)
+
+func main() {
+	fmt.Printf("Starting GoFlow app on %s...\n", runtime.GOOS)
+	fmt.Printf("Platform: {{.Platform}}\n")
+	fmt.Println()
+
+	// TODO: Initialize platform-specific window system (GLFW)
+	// TODO: Initialize rendering backend (WGPU)
+	// TODO: Set up event loop
+
+	// For now, just run the app logic
+	lib.Run()
+
+	fmt.Println()
+	fmt.Println("Note: Full platform integration coming soon!")
+	fmt.Println("This includes:")
+	fmt.Println("  - Native window creation (GLFW)")
+	fmt.Println("  - GPU rendering (WGPU)")
+	fmt.Println("  - Event handling (mouse, keyboard)")
+	fmt.Println("  - Platform-specific features")
+}

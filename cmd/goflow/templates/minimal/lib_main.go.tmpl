@@ -1,0 +1,28 @@
+package lib
+
+import (
+	"github.com/base-go/GoFlow/goflow"
+	"github.com/base-go/GoFlow/widgets"
+)
+
+type App struct {
+	goflow.BaseWidget
+}
+
+func (app *App) Build(ctx goflow.BuildContext) goflow.Widget {
+	return widgets.NewCenter(
+		widgets.NewTextWithStyle(
+			"Hello, GoFlow!",
+			&goflow.TextStyle{
+				Color:      goflow.ColorBlue,
+				FontSize:   32,
+				FontWeight: goflow.FontWeightBold,
+			},
+		),
+	)
+}
+
+// Run is the main entry point called by platform runners
+func Run() {
+	goflow.RunApp(&App{})
+}

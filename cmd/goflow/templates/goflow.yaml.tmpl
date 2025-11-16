@@ -1,0 +1,40 @@
+name: {{.ProjectName}}
+description: A GoFlow application
+version: 0.1.0+1
+
+# Go module path
+module: {{.ModulePath}}
+
+# Minimum Go version
+environment:
+  go: "1.21"
+
+# Dependencies
+dependencies:
+  goflow:
+    git: https://github.com/base-go/GoFlow
+    version: v0.1.0
+
+# Development dependencies
+dev_dependencies:
+  # Add testing frameworks here
+
+# Platform configuration
+platforms:
+{{- range .Platforms}}
+  - {{.}}
+{{- end}}
+
+# Assets
+# Uncomment to include assets in your application
+# assets:
+#   - assets/images/
+#   - assets/fonts/
+
+# Fonts
+# fonts:
+#   - family: Roboto
+#     fonts:
+#       - asset: assets/fonts/Roboto-Regular.ttf
+#       - asset: assets/fonts/Roboto-Bold.ttf
+#         weight: 700

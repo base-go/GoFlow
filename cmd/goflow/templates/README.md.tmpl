@@ -1,0 +1,66 @@
+# {{.AppName}}
+
+A GoFlow application.
+
+## Getting Started
+
+This project is built with [GoFlow](https://github.com/base-go/GoFlow), a Flutter-inspired GUI framework for Go.
+
+## Project Structure
+
+- **lib/** - Shared application code
+{{- range .Platforms}}
+- **{{.}}/** - {{. | title}} platform runner
+{{- end}}
+- **assets/** - Images, fonts, and other resources
+
+## Running the App
+
+### Development Mode (using platform runner)
+```bash
+{{if hasPlatform .Platforms "macos" -}}
+cd macos  # or other platform
+{{else if hasPlatform .Platforms "windows" -}}
+cd windows  # or other platform
+{{else if hasPlatform .Platforms "linux" -}}
+cd linux  # or other platform
+{{else -}}
+cd macos  # or windows, or linux
+{{end -}}
+go run main.go
+```
+
+### Build for Platform
+
+{{if hasPlatform .Platforms "macos" -}}
+#### macOS
+```bash
+cd macos
+go build -o {{.ProjectName}}
+./{{.ProjectName}}
+```
+{{end}}
+{{if hasPlatform .Platforms "windows" -}}
+#### Windows
+```bash
+cd windows
+go build -o {{.ProjectName}}.exe
+{{.ProjectName}}.exe
+```
+{{end}}
+{{if hasPlatform .Platforms "linux" -}}
+#### Linux
+```bash
+cd linux
+go build -o {{.ProjectName}}
+./{{.ProjectName}}
+```
+{{end}}
+## Learn More
+
+- [GoFlow Documentation](https://github.com/base-go/GoFlow)
+- [GoFlow Examples](https://github.com/base-go/GoFlow/tree/main/examples)
+
+## License
+
+This project is licensed under the MIT License.
