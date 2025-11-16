@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/base-go/mamba"
 )
@@ -203,25 +207,241 @@ func runNewCommand(cmd *mamba.Command, args []string) error {
 
 func runRunCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🚀 Running GoFlow App")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+
+	// Determine platform
+	platform := "macos"
+	if len(args) > 0 {
+		platform = args[0]
+	} else {
+		platform = detectPlatform()
+	}
+
+	cmd.PrintInfo(fmt.Sprintf("Building for platform: %s", platform))
+
+	// Check for main.go
+	mainFile := "main.go"
+	if _, err := os.Stat(mainFile); os.IsNotExist(err) {
+		mainFile = "cmd/app/main.go"
+		if _, err := os.Stat(mainFile); os.IsNotExist(err) {
+			cmd.PrintError("✗ No main.go found. Run this command in a GoFlow project directory.")
+			return fmt.Errorf("main.go not found")
+		}
+	}
+
+	// Get flags
+	noHotReload, _ := cmd.Flags().GetBool("no-hot-reload")
+	release, _ := cmd.Flags().GetBool("release")
+
+	// Build the app
+	buildMode := "debug"
+	if release {
+		buildMode = "release"
+	}
+
+	cmd.PrintInfo(fmt.Sprintf("Building in %s mode...", buildMode))
+
+	buildArgs := []string{"build"}
+	if release {
+		buildArgs = append(buildArgs, "-ldflags", "-s -w") // Strip debug symbols
+	}
+	buildArgs = append(buildArgs, "-o", "./build/app", mainFile)
+
+	if output, err := runCommand("go", buildArgs...); err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ Build failed:\n%s", output))
+		return fmt.Errorf("build failed")
+	}
+
+	cmd.PrintSuccess("✓ Build completed successfully")
+
+	if !noHotReload && !release {
+		cmd.PrintInfo("Hot reload: enabled (watching for changes...)")
+		cmd.PrintWarning("⚠ Full hot reload integration coming soon")
+	}
+
+	// Run the app
+	cmd.PrintInfo("Starting application...")
+	runArgs := []string{"./build/app"}
+
+	if output, err := runCommand(runArgs[0]); err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ App failed:\n%s", output))
+		return fmt.Errorf("app failed")
+	}
+
 	return nil
 }
 
 func runBuildCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🔨 Building GoFlow App")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+
+	// Determine platform
+	platform := "macos"
+	if len(args) > 0 {
+		platform = args[0]
+	} else {
+		platform = detectPlatform()
+	}
+
+	// Get flags
+	release, _ := cmd.Flags().GetBool("release")
+	bundle, _ := cmd.Flags().GetBool("bundle")
+	outputDir, _ := cmd.Flags().GetString("output")
+	strip, _ := cmd.Flags().GetBool("strip")
+
+	if outputDir == "" {
+		outputDir = "./build"
+	}
+
+	cmd.PrintInfo(fmt.Sprintf("Building for platform: %s", platform))
+	cmd.PrintInfo(fmt.Sprintf("Output directory: %s", outputDir))
+
+	// Check for main.go
+	mainFile := "main.go"
+	if _, err := os.Stat(mainFile); os.IsNotExist(err) {
+		mainFile = "cmd/app/main.go"
+		if _, err := os.Stat(mainFile); os.IsNotExist(err) {
+			cmd.PrintError("✗ No main.go found")
+			return fmt.Errorf("main.go not found")
+		}
+	}
+
+	// Create output directory
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ Failed to create output directory: %v", err))
+		return err
+	}
+
+	// Build arguments
+	buildArgs := []string{"build"}
+
+	if release && strip {
+		buildArgs = append(buildArgs, "-ldflags", "-s -w")
+		cmd.PrintInfo("Build mode: Release (optimized, stripped)")
+	} else {
+		cmd.PrintInfo("Build mode: Debug")
+	}
+
+	outputFile := filepath.Join(outputDir, getAppName(platform))
+	buildArgs = append(buildArgs, "-o", outputFile, mainFile)
+
+	cmd.PrintInfo("Building...")
+
+	if output, err := runCommand("go", buildArgs...); err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ Build failed:\n%s", output))
+		return fmt.Errorf("build failed")
+	}
+
+	cmd.PrintSuccess(fmt.Sprintf("✓ Build completed: %s", outputFile))
+
+	if bundle {
+		cmd.PrintWarning("⚠ App bundling not yet implemented")
+	}
+
 	return nil
 }
 
 func runTestCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🧪 Running Tests")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+
+	// Get flags
+	coverage, _ := cmd.Flags().GetBool("coverage")
+	golden, _ := cmd.Flags().GetBool("golden")
+	runPattern, _ := cmd.Flags().GetString("run")
+	verbose, _ := cmd.Flags().GetBool("verbose")
+
+	// Build test arguments
+	testArgs := []string{"test"}
+
+	if verbose {
+		testArgs = append(testArgs, "-v")
+	}
+
+	if coverage {
+		testArgs = append(testArgs, "-coverprofile=coverage.out")
+		cmd.PrintInfo("Coverage: enabled")
+	}
+
+	if runPattern != "" {
+		testArgs = append(testArgs, "-run", runPattern)
+		cmd.PrintInfo(fmt.Sprintf("Running tests matching: %s", runPattern))
+	}
+
+	if golden {
+		cmd.PrintInfo("Golden files: will be updated")
+		os.Setenv("UPDATE_GOLDENS", "1")
+	}
+
+	// Add package arguments
+	if len(args) > 0 {
+		testArgs = append(testArgs, args...)
+	} else {
+		testArgs = append(testArgs, "./...")
+	}
+
+	cmd.PrintInfo("Running tests...")
+
+	if output, err := runCommand("go", testArgs...); err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ Tests failed:\n%s", output))
+		return fmt.Errorf("tests failed")
+	} else {
+		cmd.PrintSuccess("✓ All tests passed")
+		if verbose {
+			fmt.Println(output)
+		}
+	}
+
+	if coverage {
+		cmd.PrintInfo("Generating coverage report...")
+		if _, err := runCommand("go", "tool", "cover", "-html=coverage.out", "-o", "coverage.html"); err != nil {
+			cmd.PrintWarning(fmt.Sprintf("⚠ Failed to generate HTML coverage: %v", err))
+		} else {
+			cmd.PrintSuccess("✓ Coverage report: coverage.html")
+		}
+	}
+
 	return nil
 }
 
 func runDoctorCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🏥 GoFlow Doctor")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+
+	allOK := true
+
+	// Check Go installation
+	cmd.PrintInfo("Checking Go installation...")
+	goVersion, err := checkGoVersion()
+	if err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ Go not found: %v", err))
+		allOK = false
+	} else {
+		cmd.PrintSuccess(fmt.Sprintf("✓ Go version: %s", goVersion))
+	}
+
+	// Check GoFlow version
+	cmd.PrintInfo("Checking GoFlow version...")
+	cmd.PrintSuccess(fmt.Sprintf("✓ GoFlow CLI: v%s", cliVersion))
+
+	// Check platform-specific tools
+	cmd.PrintInfo("Checking platform tools...")
+	if err := checkPlatformTools(cmd); err != nil {
+		allOK = false
+	}
+
+	// Check required packages
+	cmd.PrintInfo("Checking Go module dependencies...")
+	if err := checkModuleDeps(cmd); err != nil {
+		cmd.PrintWarning(fmt.Sprintf("⚠ Module check: %v", err))
+	} else {
+		cmd.PrintSuccess("✓ All dependencies available")
+	}
+
+	fmt.Println()
+	if allOK {
+		cmd.PrintSuccess("✓ Everything looks good! You're ready to build GoFlow apps.")
+	} else {
+		cmd.PrintWarning("⚠ Some issues detected. Please install missing dependencies.")
+		return fmt.Errorf("environment check failed")
+	}
+
 	return nil
 }
 
@@ -241,4 +461,118 @@ func runFormatCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("✨ Formatting Code")
 	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
 	return nil
+}
+
+// Helper functions for doctor command
+
+func checkGoVersion() (string, error) {
+	output, err := runCommand("go", "version")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(output), nil
+}
+
+func checkPlatformTools(cmd *mamba.Command) error {
+	hasIssue := false
+
+	switch getOS() {
+	case "darwin":
+		// Check for Xcode
+		if _, err := runCommand("xcodebuild", "-version"); err != nil {
+			cmd.PrintWarning("⚠ Xcode not found (required for macOS apps)")
+			hasIssue = true
+		} else {
+			cmd.PrintSuccess("✓ Xcode installed")
+		}
+	case "windows":
+		// Check for MSVC
+		cmd.PrintInfo("ℹ Windows: Ensure Visual Studio with C++ tools is installed")
+	case "linux":
+		// Check for GTK
+		if _, err := runCommand("pkg-config", "--modversion", "gtk+-3.0"); err != nil {
+			cmd.PrintWarning("⚠ GTK3 not found (required for Linux apps)")
+			hasIssue = true
+		} else {
+			cmd.PrintSuccess("✓ GTK3 installed")
+		}
+	}
+
+	if hasIssue {
+		return fmt.Errorf("platform tools missing")
+	}
+	return nil
+}
+
+func checkModuleDeps(cmd *mamba.Command) error {
+	if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
+		return fmt.Errorf("not in a Go module directory")
+	}
+
+	output, err := runCommand("go", "list", "-m", "all")
+	if err != nil {
+		return err
+	}
+
+	// Check for key dependencies
+	required := []string{
+		"github.com/base-go/GoFlow",
+		"github.com/fsnotify/fsnotify",
+	}
+
+	for _, dep := range required {
+		if !strings.Contains(output, dep) {
+			return fmt.Errorf("missing required dependency: %s", dep)
+		}
+	}
+
+	return nil
+}
+
+func getOS() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return "darwin"
+	case "windows":
+		return "windows"
+	case "linux":
+		return "linux"
+	default:
+		return "unknown"
+	}
+}
+
+func runCommand(name string, args ...string) (string, error) {
+	var out strings.Builder
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err := cmd.Run()
+	return out.String(), err
+}
+
+func detectPlatform() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return "macos"
+	case "windows":
+		return "windows"
+	case "linux":
+		return "linux"
+	default:
+		return runtime.GOOS
+	}
+}
+
+func getAppName(platform string) string {
+	switch platform {
+	case "windows":
+		return "app.exe"
+	case "macos":
+		return "app"
+	case "linux":
+		return "app"
+	default:
+		return "app"
+	}
 }
