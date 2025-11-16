@@ -342,3 +342,6 @@ func (m *KeyBindingManager) RemoveBinding(key Key, modifiers KeyModifiers) {
 func (m *KeyBindingManager) Clear() {
 	m.bindings = make([]*KeyBinding, 0)
 }
+
+// KeyEvent is an alias for KeyboardEvent for convenience
+type KeyEvent = KeyboardEvent

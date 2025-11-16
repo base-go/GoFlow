@@ -327,3 +327,25 @@ func (m *MouseRegionManager) GetCursorAt(position *goflow.Offset) CursorType {
 func (m *MouseRegionManager) Clear() {
 	m.regions = make([]*MouseRegion, 0)
 }
+
+// ScrollEvent is an alias for MouseWheelEvent
+type ScrollEvent struct {
+	PositionEvent
+	ScrollDelta *goflow.Offset
+}
+
+// NewScrollEvent creates a new scroll event
+func NewScrollEvent(position *goflow.Offset, delta *goflow.Offset) *ScrollEvent {
+	return &ScrollEvent{
+		PositionEvent: PositionEvent{
+			BaseEvent: BaseEvent{
+				EventType:  EventTypeMouseWheel,
+				Time:       time.Now(),
+				DeviceType: DeviceTypeMouse,
+			},
+			Position: position,
+			Global:   position,
+		},
+		ScrollDelta: delta,
+	}
+}
