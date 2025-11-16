@@ -411,3 +411,12 @@ func (r *TouchGestureRecognizer) Reset() {
 	r.initialScale = 1.0
 	r.initialRotation = 0.0
 }
+
+// MultiTouchEvent represents multi-touch events with pointer tracking
+type MultiTouchEvent struct {
+	PositionEvent
+	PointerID int // Unique pointer identifier
+	TouchID   int // Touch identifier
+	IsPrimary bool
+	Pressure  float64
+}
