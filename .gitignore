@@ -29,5 +29,21 @@ vendor/
 Thumbs.db
 cmd/goflow/goflow
 
+# Example binaries (compiled executables in examples/)
+examples/*/layout-demo
+examples/*/rendering-demo
+examples/*/counter-app
+examples/*/goflow-counter
+examples/*/shopping-cart
+examples/*/input-demo
+examples/*/basic
+examples/*/playground
+examples/*/material-demo
+examples/*/goflow-hello
+examples/*/todo-list
+examples/*/adaptive-demo
+examples/*/cupertino-demo
+examples/*/input-widgets
+
 # Demo/template directories
 demo_flutter_for_template/
