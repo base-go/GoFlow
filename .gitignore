@@ -30,20 +30,21 @@ Thumbs.db
 cmd/goflow/goflow
 
 # Example binaries (compiled executables in examples/)
-examples/*/layout-demo
-examples/*/rendering-demo
-examples/*/counter-app
-examples/*/goflow-counter
-examples/*/shopping-cart
-examples/*/input-demo
-examples/*/basic
-examples/*/playground
-examples/*/material-demo
-examples/*/goflow-hello
-examples/*/todo-list
-examples/*/adaptive-demo
-examples/*/cupertino-demo
-examples/*/input-widgets
+examples/layout-demo/layout-demo
+examples/rendering-demo/rendering-demo
+examples/counter-app/counter-app
+examples/goflow-counter/goflow-counter
+examples/shopping-cart/shopping-cart
+examples/input-demo/input-demo
+examples/basic/basic
+examples/playground/playground
+examples/material-demo/material-demo
+examples/goflow-hello/goflow-hello
+examples/todo-list/todo-list
+examples/adaptive-demo/adaptive-demo
+examples/cupertino-demo/cupertino-demo
+examples/input-widgets/input-widgets
+examples/stack-demo/stack-demo
 
 # Demo/template directories
 demo_flutter_for_template/
