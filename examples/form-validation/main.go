@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/base-go/GoFlow/signals"
 )

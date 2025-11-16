@@ -1,15 +1,23 @@
 # GoFlow
 
-A reactive state management library for Go, inspired by signals pattern from Preact/Dart.
+A reactive GUI framework for Go with signals-based state management and platform-adaptive design systems.
 
 ## Features
 
+### Core Framework
 - **Signal**: Reactive value containers that notify listeners on change
 - **Computed**: Automatically derived values with dependency tracking
 - **Effect**: Side effects that run when dependencies change
 - **Batch**: Group multiple updates to prevent unnecessary recomputation
 - **Untracked**: Read signal values without creating subscriptions
 - **Collections**: Reactive slices and maps with built-in helpers (Filter, Map, etc.)
+
+### GUI & Design Systems
+- **Adaptive Widgets**: Automatically switch between Material and Cupertino based on platform
+- **Material Design**: Google's design system (Android, Linux, Windows, Web)
+- **Cupertino**: Apple's design language (iOS, macOS)
+- **Platform Detection**: Automatic platform-specific styling
+- **Widget System**: Declarative UI with reactive updates
 
 ## Installation
 
@@ -111,15 +119,59 @@ dispose := signals.NewEffect(func() {
 })
 ```
 
+## Design Systems
+
+GoFlow provides three approaches to building cross-platform UIs:
+
+### Adaptive Widgets (Recommended)
+Write once, automatically adapts to platform:
+
+```go
+import "github.com/base-go/GoFlow/adaptive"
+
+// Button automatically becomes Material or Cupertino
+button := adaptive.NewButton("Click Me", func() {
+    fmt.Println("Clicked!")
+})
+
+// Card adapts to platform style
+card := adaptive.NewCard(content)
+
+// AppBar becomes Material AppBar or Cupertino NavigationBar
+appBar := adaptive.NewAppBar(title)
+```
+
+### Platform-Specific Widgets
+
+Use Material Design or Cupertino explicitly:
+
+```go
+// Material Design (Android, Web, Desktop)
+import "github.com/base-go/GoFlow/material"
+btn := material.NewButton(child, onPressed)
+
+// Cupertino (iOS, macOS)
+import "github.com/base-go/GoFlow/cupertino"
+btn := cupertino.NewButton(child, onPressed)
+```
+
+See [DESIGN_SYSTEMS.md](DESIGN_SYSTEMS.md) for complete documentation.
+
 ## Examples
 
 See the [examples](examples/) directory for more complete examples:
 
+### Signals Examples
 - [Basic](examples/basic/) - Simple signal usage
 - [Counter App](examples/counter-app/) - Interactive counter with multiple computed values
 - [Shopping Cart](examples/shopping-cart/) - Shopping cart with reactive total
 - [Form Validation](examples/form-validation/) - Real-time form validation
 - [Todo List](examples/todo-list/) - Todo list using SignalSlice
+
+### Design System Examples
+- [Adaptive Demo](examples/adaptive-demo/) - Platform-adaptive widgets
+- [Material Demo](examples/material-demo/) - Material Design widgets
+- [Cupertino Demo](examples/cupertino-demo/) - iOS/macOS widgets
 
 ## Performance
 
