@@ -21,7 +21,7 @@ go run main.go
 ## 📚 Documentation
 
 - **[Getting Started](./docs/GETTING_STARTED.md)** - Complete beginner tutorial
-- **[Architecture](./ARCHITECTURE.md)** - Framework architecture deep dive
+- **[Architecture](./docs/ARCHITECTURE.md)** - Framework architecture deep dive
 - **[CLI Reference](./docs/CLI.md)** - Complete CLI documentation
 - **[Project Structure](./docs/PROJECT_STRUCTURE.md)** - Project organization guide
 - **[Rendering Architecture](./docs/RENDERING.md)** - How rendering works
@@ -200,7 +200,7 @@ import "github.com/base-go/GoFlow/pkg/ui/cupertino"
 btn := cupertino.NewButton(child, onPressed)
 ```
 
-See [DESIGN_SYSTEMS.md](DESIGN_SYSTEMS.md) for complete documentation.
+See [DESIGN_SYSTEMS.md](./docs/DESIGN_SYSTEMS.md) for complete documentation.
 
 ## Available Widgets
 
@@ -336,7 +336,7 @@ go test ./signals -bench=. -benchmem
 - Complete Material Design implementation
 - Complete Cupertino implementation
 
-See [RENDERING.md](./docs/RENDERING.md) and [PLATFORM_INTEGRATION.md](./docs/PLATFORM_INTEGRATION.md) for details.
+See [RENDERING.md](./docs/RENDERING.md), [PLATFORM_INTEGRATION.md](./docs/PLATFORM_INTEGRATION.md), and [PROGRESS.md](./docs/PROGRESS.md) for details.
 
 ## 🤝 Contributing
 
@@ -351,9 +351,10 @@ See our [GitHub repository](https://github.com/base-go/GoFlow) for more informat
 
 ## 📚 Learn More
 
-- [Architecture Guide](./ARCHITECTURE.md) - Deep dive into the framework
+- [Architecture Guide](./docs/ARCHITECTURE.md) - Deep dive into the framework
 - [Getting Started](./docs/GETTING_STARTED.md) - Step-by-step tutorial
 - [Workflow Guide](./docs/WORKFLOW.md) - Complete technical flow
+- [Widget Reference](./docs/WIDGETS_REFERENCE.md) - Complete widget catalog
 - [Examples](./examples/) - Sample applications
 - [API Documentation](https://pkg.go.dev/github.com/base-go/GoFlow) - Go package docs
 
