@@ -49,6 +49,8 @@ var (
 	IconInfo       = IconData{Name: "info", CodePoint: '\ue88e'}
 	IconWarning    = IconData{Name: "warning", CodePoint: '\ue002'}
 	IconError      = IconData{Name: "error", CodePoint: '\ue000'}
+	IconArrowDropDown = IconData{Name: "arrow_drop_down", CodePoint: '\ue5c5'}
+	IconMoreVert   = IconData{Name: "more_vert", CodePoint: '\ue5d4'}
 )
 
 // NewIcon creates a new Icon widget
