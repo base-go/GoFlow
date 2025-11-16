@@ -1,342 +1,244 @@
 package main
 
 import (
-	"embed"
-	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
-	"text/template"
+
+	"github.com/base-go/mamba"
 )
 
-//go:embed templates/*
-var templatesFS embed.FS
+const cliVersion = "0.2.0"
 
-const version = "0.1.0"
+var rootCmd = &mamba.Command{
+	Use:   "goflow",
+	Short: "GoFlow - Flutter-inspired GUI framework for Go",
+	Long: `GoFlow is a modern GUI framework for Go that brings Flutter's
+developer experience to desktop and web applications.
 
-type TemplateData struct {
-	ProjectName string
-	AppName     string
-	ModulePath  string
-	Platform    string
-	Platforms   []string
+Features:
+  • Reactive UI with Signals
+  • Hot reload for rapid development
+  • Comprehensive widget library
+  • Navigation & routing
+  • Testing framework
+  • Cross-platform support`,
+	Version: cliVersion,
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		printUsage()
-		os.Exit(1)
-	}
+	// Add commands
+	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(buildCmd)
+	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(cleanCmd)
+	rootCmd.AddCommand(analyzeCmd)
+	rootCmd.AddCommand(formatCmd)
 
-	command := os.Args[1]
-
-	switch command {
-	case "new", "create":
-		createCommand()
-	case "version", "--version", "-v":
-		fmt.Printf("GoFlow CLI v%s\n", version)
-	case "help", "--help", "-h":
-		printUsage()
-	default:
-		fmt.Printf("Unknown command: %s\n\n", command)
-		printUsage()
+	// Execute
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func printUsage() {
-	fmt.Println("GoFlow - Flutter-inspired GUI framework for Go")
-	fmt.Println()
-	fmt.Println("Usage:")
-	fmt.Println("  goflow new <project_name> [flags]        Create a new GoFlow project")
-	fmt.Println("  goflow create <project_name> [flags]     Alias for 'new'")
-	fmt.Println("  goflow version                           Show version information")
-	fmt.Println("  goflow help                              Show this help message")
-	fmt.Println()
-	fmt.Println("Flags for 'new'/'create':")
-	fmt.Println("  --platforms string    Comma-separated list of platforms (default: macos,windows,linux)")
-	fmt.Println("                        Available: macos, windows, linux, web")
-	fmt.Println("  --template string     Project template (default: default)")
-	fmt.Println("                        Available: default, material, minimal")
-	fmt.Println("  --org string          Organization name for the module (default: com.example)")
-	fmt.Println()
-	fmt.Println("Examples:")
-	fmt.Println("  goflow new myapp")
-	fmt.Println("  goflow new myapp --platforms=macos,linux")
-	fmt.Println("  goflow new myapp --template=material --org=com.mycompany")
-	fmt.Println()
-	fmt.Println("Installation:")
-	fmt.Println("  go install github.com/base-go/GoFlow/cmd/goflow@latest")
+// newCmd creates a new GoFlow project
+var newCmd = &mamba.Command{
+	Use:     "new <project_name>",
+	Aliases: []string{"create"},
+	Short:   "Create a new GoFlow project",
+	Long: `Create a new GoFlow project with Flutter-style structure.
+
+Examples:
+  goflow new myapp
+  goflow new myapp --platforms=macos,linux
+  goflow new myapp --template=material
+  goflow new myapp --org=com.mycompany`,
+	Args: mamba.ExactArgs(1),
+	RunE: runNewCommand,
 }
 
-func createCommand() {
-	createFlags := flag.NewFlagSet("create", flag.ExitOnError)
-	platforms := createFlags.String("platforms", "macos,windows,linux", "Comma-separated list of platforms")
-	templateName := createFlags.String("template", "default", "Project template")
-	org := createFlags.String("org", "com.example", "Organization name")
+// runCmd runs the GoFlow app
+var runCmd = &mamba.Command{
+	Use:   "run [platform]",
+	Short: "Run the GoFlow app with hot reload",
+	Long: `Run your GoFlow app on the specified platform with hot reload enabled.
 
-	if len(os.Args) < 3 {
-		fmt.Println("Error: project name required")
-		fmt.Println()
-		fmt.Println("Usage: goflow new <project_name> [flags]")
-		os.Exit(1)
-	}
+If no platform is specified, auto-detects the current platform.
 
-	projectName := os.Args[2]
-	createFlags.Parse(os.Args[3:])
-
-	// Validate project name
-	if !isValidProjectName(projectName) {
-		fmt.Printf("Error: '%s' is not a valid project name\n", projectName)
-		fmt.Println("Project name must:")
-		fmt.Println("  - Start with a letter")
-		fmt.Println("  - Contain only letters, numbers, underscores, and hyphens")
-		os.Exit(1)
-	}
-
-	// Parse platforms
-	platformList := strings.Split(*platforms, ",")
-	validPlatforms := validatePlatforms(platformList)
-
-	if len(validPlatforms) == 0 {
-		fmt.Println("Error: no valid platforms specified")
-		os.Exit(1)
-	}
-
-	fmt.Printf("Creating GoFlow project: %s\n", projectName)
-	fmt.Printf("Organization: %s\n", *org)
-	fmt.Printf("Platforms: %s\n", strings.Join(validPlatforms, ", "))
-	fmt.Printf("Template: %s\n", *templateName)
-	fmt.Println()
-
-	// Create project
-	if err := createProject(projectName, *org, validPlatforms, *templateName); err != nil {
-		fmt.Printf("Error creating project: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println()
-	fmt.Println("✅ Project created successfully!")
-	fmt.Println()
-	fmt.Println("Next steps:")
-	fmt.Printf("  cd %s\n", projectName)
-	fmt.Println("  go mod tidy")
-	fmt.Println()
-	fmt.Println("To run your app (development):")
-	firstPlatform := validPlatforms[0]
-	fmt.Printf("  cd %s && go run main.go\n", firstPlatform)
-	fmt.Println()
-	fmt.Println("To build for specific platform:")
-	for _, p := range validPlatforms {
-		fmt.Printf("  cd %s && go build    # %s\n", p, strings.Title(p))
-	}
+Examples:
+  goflow run              # Auto-detect platform
+  goflow run macos        # Run on macOS
+  goflow run --no-hot-reload  # Disable hot reload
+  goflow run --release    # Run release build`,
+	Args: mamba.MaximumNArgs(1),
+	RunE: runRunCommand,
 }
 
-func isValidProjectName(name string) bool {
-	if len(name) == 0 {
-		return false
-	}
+// buildCmd builds the GoFlow app
+var buildCmd = &mamba.Command{
+	Use:   "build [platform]",
+	Short: "Build the GoFlow app for production",
+	Long: `Build your GoFlow app for the specified platform with optimizations.
 
-	// Must start with a letter
-	if !((name[0] >= 'a' && name[0] <= 'z') || (name[0] >= 'A' && name[0] <= 'Z')) {
-		return false
-	}
-
-	// Must contain only letters, numbers, underscores, hyphens
-	for _, c := range name {
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-') {
-			return false
-		}
-	}
-
-	return true
+Examples:
+  goflow build macos      # Build for macOS
+  goflow build --release  # Optimized release build
+  goflow build --bundle   # Create app bundle/installer`,
+	Args: mamba.MaximumNArgs(1),
+	RunE: runBuildCommand,
 }
 
-func validatePlatforms(platforms []string) []string {
-	validPlatformNames := map[string]bool{
-		"macos":   true,
-		"windows": true,
-		"linux":   true,
-		"web":     true,
-	}
+// testCmd runs tests
+var testCmd = &mamba.Command{
+	Use:   "test [packages...]",
+	Short: "Run tests",
+	Long: `Run widget tests, golden tests, and integration tests.
 
-	result := make([]string, 0)
-	seen := make(map[string]bool)
-
-	for _, p := range platforms {
-		p = strings.TrimSpace(strings.ToLower(p))
-		if validPlatformNames[p] && !seen[p] {
-			result = append(result, p)
-			seen[p] = true
-		}
-	}
-
-	return result
+Examples:
+  goflow test             # Run all tests
+  goflow test ./lib/...   # Run specific tests
+  goflow test --coverage  # With coverage
+  goflow test --golden    # Update golden files`,
+	RunE: runTestCommand,
 }
 
-func createProject(projectName, org string, platforms []string, templateName string) error {
-	// Create project directory
-	if err := os.MkdirAll(projectName, 0755); err != nil {
-		return fmt.Errorf("failed to create project directory: %w", err)
-	}
+// doctorCmd checks the environment
+var doctorCmd = &mamba.Command{
+	Use:   "doctor",
+	Short: "Check your environment and dependencies",
+	Long: `Verify that all required tools and dependencies are installed.
 
-	projectPath, err := filepath.Abs(projectName)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path: %w", err)
-	}
+Checks:
+  • Go installation and version
+  • GoFlow version
+  • Platform SDKs (Xcode, MSVC, GTK)
+  • Required Go packages`,
+	RunE: runDoctorCommand,
+}
 
-	// Create directory structure
-	dirs := []string{
-		"lib/screens",
-		"lib/widgets",
-		"lib/models",
-		"lib/services",
-		"lib/state",
-		"assets/fonts",
-		"assets/images",
-		"assets/icons",
-		"test",
-	}
+// cleanCmd cleans build artifacts
+var cleanCmd = &mamba.Command{
+	Use:   "clean",
+	Short: "Clean build artifacts and caches",
+	Long: `Remove build artifacts, temporary files, and caches.
 
-	// Add platform directories
-	for _, platform := range platforms {
-		dirs = append(dirs, filepath.Join(platform, "runner"))
-		dirs = append(dirs, filepath.Join(platform, "assets"))
-	}
+Examples:
+  goflow clean        # Clean build directory
+  goflow clean --deep # Clean cache too`,
+	RunE: runCleanCommand,
+}
 
-	for _, dir := range dirs {
-		dirPath := filepath.Join(projectPath, dir)
-		if err := os.MkdirAll(dirPath, 0755); err != nil {
-			return fmt.Errorf("failed to create directory %s: %w", dir, err)
-		}
-	}
+// analyzeCmd analyzes code
+var analyzeCmd = &mamba.Command{
+	Use:   "analyze",
+	Short: "Analyze and lint your code",
+	Long: `Run static analysis and linting on your GoFlow project.
 
-	// Prepare template data
-	modulePath := fmt.Sprintf("%s/%s", org, projectName)
-	appName := capitalize(projectName)
-	data := TemplateData{
-		ProjectName: projectName,
-		AppName:     appName,
-		ModulePath:  modulePath,
-		Platforms:   platforms,
-	}
+Examples:
+  goflow analyze          # Analyze code
+  goflow analyze --fix    # Auto-fix issues`,
+	RunE: runAnalyzeCommand,
+}
 
-	// Create root-level files from templates
-	if err := createFromTemplate(filepath.Join(projectPath, "go.mod"), "templates/go.mod.tmpl", data); err != nil {
-		return err
-	}
+// formatCmd formats code
+var formatCmd = &mamba.Command{
+	Use:   "format",
+	Short: "Format your code",
+	Long: `Format Go code using gofmt.
 
-	if err := createFromTemplate(filepath.Join(projectPath, ".gitignore"), "templates/.gitignore.tmpl", data); err != nil {
-		return err
-	}
+Examples:
+  goflow format           # Format all .go files
+  goflow format --check   # Check formatting without changes`,
+	RunE: runFormatCommand,
+}
 
-	if err := createFromTemplate(filepath.Join(projectPath, "README.md"), "templates/README.md.tmpl", data); err != nil {
-		return err
-	}
+func init() {
+	// Flags for 'new' command
+	newCmd.Flags().StringP("platforms", "p", "macos,windows,linux", "Target platforms (macos,windows,linux,web)")
+	newCmd.Flags().StringP("template", "t", "default", "Project template (default,material,minimal)")
+	newCmd.Flags().StringP("org", "o", "com.example", "Organization for module path")
+	newCmd.Flags().Bool("interactive", false, "Interactive mode with prompts")
 
-	// Create goflow.yaml (similar to Flutter's pubspec.yaml)
-	if err := createFromTemplate(filepath.Join(projectPath, "goflow.yaml"), "templates/goflow.yaml.tmpl", data); err != nil {
-		return err
-	}
+	// Flags for 'run' command
+	runCmd.Flags().Bool("no-hot-reload", false, "Disable hot reload")
+	runCmd.Flags().BoolP("release", "r", false, "Run release build")
+	runCmd.Flags().String("target", "", "Target device/emulator")
+	runCmd.Flags().IntP("port", "p", 8080, "Hot reload server port")
 
-	// Create analysis_options.yaml (for future linting)
-	if err := createFromTemplate(filepath.Join(projectPath, "analysis_options.yaml"), "templates/analysis_options.yaml.tmpl", data); err != nil {
-		return err
-	}
+	// Flags for 'build' command
+	buildCmd.Flags().BoolP("release", "r", true, "Build release version")
+	buildCmd.Flags().Bool("bundle", false, "Create app bundle/installer")
+	buildCmd.Flags().StringP("output", "o", "", "Output directory")
+	buildCmd.Flags().Bool("strip", true, "Strip debug symbols")
 
-	// Create lib/main.go from template
-	libTemplatePath := fmt.Sprintf("templates/%s/lib_main.go.tmpl", templateName)
-	if err := createFromTemplate(filepath.Join(projectPath, "lib", "main.go"), libTemplatePath, data); err != nil {
-		return err
-	}
+	// Flags for 'test' command
+	testCmd.Flags().BoolP("coverage", "c", false, "Generate coverage report")
+	testCmd.Flags().Bool("golden", false, "Update golden files")
+	testCmd.Flags().StringP("run", "r", "", "Run only tests matching pattern")
+	testCmd.Flags().BoolP("verbose", "v", false, "Verbose output")
 
-	// Create platform runners
-	for _, platform := range platforms {
-		data.Platform = platform
-		runnerPath := filepath.Join(projectPath, platform, "main.go")
-		if err := createFromTemplate(runnerPath, "templates/platform_main.go.tmpl", data); err != nil {
-			return err
-		}
+	// Flags for 'clean' command
+	cleanCmd.Flags().Bool("deep", false, "Deep clean including cache")
+	cleanCmd.Flags().BoolP("force", "f", false, "Force clean without confirmation")
 
-		// Create platform-specific .gitignore
-		var platformGitignoreTmpl string
-		switch platform {
-		case "macos":
-			platformGitignoreTmpl = "templates/macos_.gitignore.tmpl"
-		case "linux":
-			platformGitignoreTmpl = "templates/linux_.gitignore.tmpl"
-		case "windows":
-			platformGitignoreTmpl = "templates/windows_.gitignore.tmpl"
-		}
+	// Flags for 'analyze' command
+	analyzeCmd.Flags().Bool("fix", false, "Auto-fix issues")
+	analyzeCmd.Flags().StringSlice("ignore", []string{}, "Patterns to ignore")
 
-		if platformGitignoreTmpl != "" {
-			gitignorePath := filepath.Join(projectPath, platform, ".gitignore")
-			if err := createFromTemplate(gitignorePath, platformGitignoreTmpl, data); err != nil {
-				return err
-			}
-		}
-	}
+	// Flags for 'format' command
+	formatCmd.Flags().Bool("check", false, "Check formatting without changes")
+	formatCmd.Flags().BoolP("write", "w", true, "Write changes to files")
+}
 
+// Command implementations (stubs for now, will implement in next phases)
+
+func runNewCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("📦 Creating New GoFlow Project")
+	// Will implement with current logic + interactive mode
+	cmd.PrintWarning("Not yet fully implemented - migrating from old CLI...")
 	return nil
 }
 
-func createFromTemplate(outputPath, templatePath string, data TemplateData) error {
-	// Read template from embedded FS
-	tmplContent, err := templatesFS.ReadFile(templatePath)
-	if err != nil {
-		return fmt.Errorf("failed to read template %s: %w", templatePath, err)
-	}
-
-	// Parse template with custom functions
-	funcMap := template.FuncMap{
-		"title": strings.Title,
-		"hasPlatform": func(platforms []string, platform string) bool {
-			for _, p := range platforms {
-				if p == platform {
-					return true
-				}
-			}
-			return false
-		},
-	}
-
-	tmpl, err := template.New(filepath.Base(templatePath)).Funcs(funcMap).Parse(string(tmplContent))
-	if err != nil {
-		return fmt.Errorf("failed to parse template %s: %w", templatePath, err)
-	}
-
-	// Create output file
-	outFile, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file %s: %w", outputPath, err)
-	}
-	defer outFile.Close()
-
-	// Execute template
-	if err := tmpl.Execute(outFile, data); err != nil {
-		return fmt.Errorf("failed to execute template %s: %w", templatePath, err)
-	}
-
+func runRunCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🚀 Running GoFlow App")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
 	return nil
 }
 
-func capitalize(s string) string {
-	if len(s) == 0 {
-		return s
-	}
+func runBuildCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🔨 Building GoFlow App")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+	return nil
+}
 
-	// Convert to title case and remove hyphens/underscores
-	// e.g., "material-demo" -> "MaterialDemo", "my_app" -> "MyApp"
-	parts := strings.FieldsFunc(s, func(r rune) bool {
-		return r == '-' || r == '_'
-	})
+func runTestCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🧪 Running Tests")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+	return nil
+}
 
-	for i, part := range parts {
-		if len(part) > 0 {
-			parts[i] = strings.ToUpper(part[:1]) + part[1:]
-		}
-	}
+func runDoctorCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🏥 GoFlow Doctor")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 2")
+	return nil
+}
 
-	return strings.Join(parts, "")
+func runCleanCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🧹 Cleaning Build Artifacts")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+	return nil
+}
+
+func runAnalyzeCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("🔍 Analyzing Code")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+	return nil
+}
+
+func runFormatCommand(cmd *mamba.Command, args []string) error {
+	cmd.PrintHeader("✨ Formatting Code")
+	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+	return nil
 }
