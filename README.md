@@ -2,19 +2,32 @@
 
 A Flutter-inspired GUI framework for Go with reactive state management and platform-adaptive design systems.
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # Install the CLI
 go install github.com/base-go/GoFlow/cmd/goflow@latest
 
 # Create a new project (Flutter-style)
-goflow new myapp
+goflow create myapp
 
 # Run it
 cd myapp/macos
 go run main.go
 ```
+
+**New to GoFlow?** → Start with the [**Getting Started Guide**](./docs/GETTING_STARTED.md)
+
+## 📚 Documentation
+
+- **[Getting Started](./docs/GETTING_STARTED.md)** - Complete beginner tutorial
+- **[Architecture](./ARCHITECTURE.md)** - Framework architecture deep dive
+- **[CLI Reference](./docs/CLI.md)** - Complete CLI documentation
+- **[Project Structure](./docs/PROJECT_STRUCTURE.md)** - Project organization guide
+- **[Rendering Architecture](./docs/RENDERING.md)** - How rendering works
+- **[Flutter Comparison](./docs/FLUTTER_INSPIRATION.md)** - For Flutter developers
+- **[Workflow Guide](./docs/WORKFLOW.md)** - Complete technical flow
+- **[All Documentation](./docs/)** - Browse all docs
 
 ### Project Structure
 
@@ -259,11 +272,12 @@ GoFlow includes a comprehensive set of widgets inspired by Flutter:
 
 📚 **See [docs/widgets/](docs/widgets/) for detailed widget documentation with examples**
 
-## Examples
+## 📖 Examples
 
-See the [examples](examples/) directory for more complete examples:
+See the [examples](examples/) directory for complete examples:
 
 ### Signals Examples
+- **[Playground](examples/playground/)** - Comprehensive framework feature test
 - [Basic](examples/basic/) - Simple signal usage
 - [Counter App](examples/counter-app/) - Interactive counter with multiple computed values
 - [Shopping Cart](examples/shopping-cart/) - Shopping cart with reactive total
@@ -276,7 +290,7 @@ See the [examples](examples/) directory for more complete examples:
 - [Cupertino Demo](examples/cupertino-demo/) - iOS/macOS widgets
 - [Widgets Showcase](examples/widgets-showcase/) - Comprehensive widget demonstration
 
-## Performance
+## ⚡ Performance
 
 GoFlow is designed for performance with:
 
@@ -289,6 +303,54 @@ Run benchmarks:
 ```bash
 go test ./signals -bench=. -benchmem
 ```
+
+## 🎨 Framework Status (v0.1.0)
+
+### ✅ What Works
+- Widget system (Text, Container, Column, Center)
+- Reactive signals (Signal, Computed, Effect)
+- Signal collections (SignalSlice, SignalMap)
+- Layout system (constraints, sizing)
+- Three-tree architecture (Widget → Element → RenderObject)
+- CLI tool for project creation
+- Flutter-inspired project structure
+
+### ⏳ In Progress
+- Native rendering backends (Core Graphics, Direct2D, Cairo)
+- GLFW window integration
+- Event handling (mouse, keyboard)
+- More built-in widgets
+- Design system implementations (Material, Cupertino)
+
+### 🔮 Planned
+- Hot reload
+- Animation system
+- Advanced layout widgets (Row, Stack, Grid)
+- Input widgets (TextField, Button)
+- Platform features (menus, notifications)
+- Complete Material Design implementation
+- Complete Cupertino implementation
+
+See [RENDERING.md](./docs/RENDERING.md) and [PLATFORM_INTEGRATION.md](./docs/PLATFORM_INTEGRATION.md) for details.
+
+## 🤝 Contributing
+
+GoFlow is in active development! We welcome contributions:
+
+- 🐛 Report bugs
+- 💡 Suggest features
+- 📖 Improve documentation
+- 🔧 Submit pull requests
+
+See our [GitHub repository](https://github.com/base-go/GoFlow) for more information.
+
+## 📚 Learn More
+
+- [Architecture Guide](./ARCHITECTURE.md) - Deep dive into the framework
+- [Getting Started](./docs/GETTING_STARTED.md) - Step-by-step tutorial
+- [Workflow Guide](./docs/WORKFLOW.md) - Complete technical flow
+- [Examples](./examples/) - Sample applications
+- [API Documentation](https://pkg.go.dev/github.com/base-go/GoFlow) - Go package docs
 
 ## License
 
