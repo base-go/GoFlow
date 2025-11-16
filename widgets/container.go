@@ -13,30 +13,13 @@ type Container struct {
 	Color       *goflow.Color
 	Padding     *goflow.EdgeInsets
 	Margin      *goflow.EdgeInsets
-	Alignment   Alignment
 }
-
-// Alignment specifies how a child should be aligned within its parent
-type Alignment int
-
-const (
-	AlignmentCenter Alignment = iota
-	AlignmentTopLeft
-	AlignmentTopCenter
-	AlignmentTopRight
-	AlignmentCenterLeft
-	AlignmentCenterRight
-	AlignmentBottomLeft
-	AlignmentBottomCenter
-	AlignmentBottomRight
-)
 
 // NewContainer creates a new Container
 func NewContainer() *Container {
 	return &Container{
 		Padding:   goflow.ZeroEdgeInsets(),
 		Margin:    goflow.ZeroEdgeInsets(),
-		Alignment: AlignmentTopLeft,
 	}
 }
 

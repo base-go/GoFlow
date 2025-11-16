@@ -210,21 +210,32 @@ func (e *MultiChildRenderObjectElement) GetRenderObject() goflow.RenderObject {
 	return e.renderObject
 }
 
+// MultiChildWidget interface for widgets with multiple children
+type MultiChildWidget interface {
+	GetChildren() []goflow.Widget
+}
+
+// MultiChildRenderObject interface for render objects with multiple children
+type MultiChildRenderObject interface {
+	AddChild(child goflow.RenderObject)
+}
+
 // Mount mounts the element
 func (e *MultiChildRenderObjectElement) Mount(parent goflow.Element, slot interface{}) {
 	e.SetParent(parent)
 
-	// Mount children
-	if columnWidget, ok := e.widget.(*Column); ok {
-		renderColumn := e.renderObject.(*RenderColumn)
-		for _, childWidget := range columnWidget.Children {
-			childElement := childWidget.CreateElement()
-			e.children = append(e.children, childElement)
-			childElement.Mount(e, nil)
+	// Mount children - works for any multi-child widget
+	if multiChildWidget, ok := e.widget.(MultiChildWidget); ok {
+		if multiChildRender, ok := e.renderObject.(MultiChildRenderObject); ok {
+			for _, childWidget := range multiChildWidget.GetChildren() {
+				childElement := childWidget.CreateElement()
+				e.children = append(e.children, childElement)
+				childElement.Mount(e, nil)
 
-			// Add child's render object
-			if childRenderObj := childElement.GetRenderObject(); childRenderObj != nil {
-				renderColumn.AddChild(childRenderObj)
+				// Add child's render object
+				if childRenderObj := childElement.GetRenderObject(); childRenderObj != nil {
+					multiChildRender.AddChild(childRenderObj)
+				}
 			}
 		}
 	}

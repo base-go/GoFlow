@@ -1,6 +1,6 @@
 # GoFlow
 
-A Flutter-inspired GUI framework for Go with reactive state management, inspired by signals pattern from Preact/Solid.js.
+A Flutter-inspired GUI framework for Go with reactive state management and platform-adaptive design systems.
 
 ## Quick Start
 
@@ -36,6 +36,7 @@ myapp/
 
 ## Features
 
+### Core Framework
 - **Signal**: Reactive value containers that notify listeners on change
 - **Computed**: Automatically derived values with dependency tracking
 - **Effect**: Side effects that run when dependencies change
@@ -43,13 +44,20 @@ myapp/
 - **Untracked**: Read signal values without creating subscriptions
 - **Collections**: Reactive slices and maps with built-in helpers (Filter, Map, etc.)
 
+### GUI & Design Systems
+- **Adaptive Widgets**: Automatically switch between Material and Cupertino based on platform
+- **Material Design**: Google's design system (Android, Linux, Windows, Web)
+- **Cupertino**: Apple's design language (iOS, macOS)
+- **Platform Detection**: Automatic platform-specific styling
+- **Widget System**: Declarative UI with reactive updates
+
 ## Installation
 
 ```bash
 go get github.com/base-go/GoFlow
 ```
 
-## Quick Start
+## Signals Quick Start
 
 ```go
 import "github.com/base-go/GoFlow/signals"
@@ -143,15 +151,130 @@ dispose := signals.NewEffect(func() {
 })
 ```
 
+## Design Systems
+
+GoFlow provides three approaches to building cross-platform UIs:
+
+### Adaptive Widgets (Recommended)
+Write once, automatically adapts to platform:
+
+```go
+import "github.com/base-go/GoFlow/adaptive"
+
+// Button automatically becomes Material or Cupertino
+button := adaptive.NewButton("Click Me", func() {
+    fmt.Println("Clicked!")
+})
+
+// Card adapts to platform style
+card := adaptive.NewCard(content)
+
+// AppBar becomes Material AppBar or Cupertino NavigationBar
+appBar := adaptive.NewAppBar(title)
+```
+
+### Platform-Specific Widgets
+
+Use Material Design or Cupertino explicitly:
+
+```go
+// Material Design (Android, Web, Desktop)
+import "github.com/base-go/GoFlow/material"
+btn := material.NewButton(child, onPressed)
+
+// Cupertino (iOS, macOS)
+import "github.com/base-go/GoFlow/cupertino"
+btn := cupertino.NewButton(child, onPressed)
+```
+
+See [DESIGN_SYSTEMS.md](DESIGN_SYSTEMS.md) for complete documentation.
+
+## Available Widgets
+
+GoFlow includes a comprehensive set of widgets inspired by Flutter:
+
+### Layout Widgets
+- **Column/Row**: Vertical/horizontal layout
+- **Stack**: Layered widgets
+- **Positioned**: Position children within Stack
+- **Align**: Align child within parent
+- **Container**: Padding, margin, sizing, colors
+- **Center**: Center child widget
+- **Padding**: Add padding around child
+- **SizedBox**: Fixed size container
+- **Expanded/Flexible**: Flex children in Row/Column
+- **Spacer**: Empty space in flex layouts
+
+### Form Widgets
+- **TextField** (Material/Cupertino): Text input
+- **Checkbox**: Material checkbox
+- **Radio**: Material radio button
+- **Switch** (Material/Cupertino): Toggle switch
+- **Slider** (Material/Cupertino): Value slider
+
+### Button Widgets
+- **Button** (Material/Cupertino): Primary buttons
+- **TextButton**: Text-only button (Material)
+- **OutlinedButton**: Outlined button (Material)
+- **IconButton**: Button with icon
+- **FloatingActionButton**: Material FAB
+
+### Display Widgets
+- **Text**: Display text
+- **Icon**: Display icons
+- **Image**: Display images
+
+### Scrolling Widgets
+- **ListView**: Scrollable list
+- **ListView.builder**: Lazy-loaded list
+- **GridView**: Scrollable grid
+- **SingleChildScrollView**: Scrollable single child
+
+### Interaction Widgets
+- **GestureDetector**: Detect gestures
+- **InkWell**: Material ink splash effect
+- **Draggable**: Make widget draggable
+- **DragTarget**: Accept draggable widgets
+
+### App Structure
+- **Scaffold** (Material): Basic app structure
+- **AppBar** (Material): Top app bar
+- **Drawer**: Side navigation drawer
+- **BottomNavigationBar**: Bottom navigation
+- **CupertinoPageScaffold**: iOS app structure
+- **CupertinoNavigationBar**: iOS navigation bar
+- **CupertinoTabScaffold**: iOS tabbed interface
+
+### Material-Specific
+- **Card**: Material card
+- **ListTile**: List item with leading/trailing
+- **Dialog**: Material dialog
+- **AlertDialog**: Alert dialog with actions
+- **DrawerHeader**: Drawer header
+
+### Cupertino-Specific
+- **CupertinoTextField**: iOS text field
+- **CupertinoSwitch**: iOS switch
+- **CupertinoSlider**: iOS slider
+
+📚 **See [docs/widgets/](docs/widgets/) for detailed widget documentation with examples**
+
 ## Examples
 
 See the [examples](examples/) directory for more complete examples:
 
+### Signals Examples
 - [Basic](examples/basic/) - Simple signal usage
 - [Counter App](examples/counter-app/) - Interactive counter with multiple computed values
 - [Shopping Cart](examples/shopping-cart/) - Shopping cart with reactive total
 - [Form Validation](examples/form-validation/) - Real-time form validation
 - [Todo List](examples/todo-list/) - Todo list using SignalSlice
+
+### Design System Examples
+- [Adaptive Demo](examples/adaptive-demo/) - Platform-adaptive widgets
+- [Material Demo](examples/material-demo/) - Material Design widgets
+- [Cupertino Demo](examples/cupertino-demo/) - iOS/macOS widgets
+- [Widgets Showcase](examples/widgets-showcase/) - Comprehensive widget demonstration
 
 ## Performance
 
