@@ -39,6 +39,7 @@ func main() {
 	rootCmd.AddCommand(cleanCmd)
 	rootCmd.AddCommand(analyzeCmd)
 	rootCmd.AddCommand(formatCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	// Execute
 	if err := rootCmd.Execute(); err != nil {
@@ -156,6 +157,17 @@ Examples:
   goflow format           # Format all .go files
   goflow format --check   # Check formatting without changes`,
 	RunE: runFormatCommand,
+}
+
+// versionCmd shows version information
+var versionCmd = &mamba.Command{
+	Use:     "version",
+	Aliases: []string{"v"},
+	Short:   "Show version information",
+	Long:    `Display the version of the GoFlow CLI.`,
+	Run: func(cmd *mamba.Command, args []string) {
+		cmd.PrintInfo(fmt.Sprintf("GoFlow CLI v%s", cliVersion))
+	},
 }
 
 func init() {
