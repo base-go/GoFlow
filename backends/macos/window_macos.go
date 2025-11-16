@@ -319,7 +319,7 @@ func Run() {
 }
 
 //export goDrawCallback
-func goDrawCallback(handle C.WindowHandle, userData unsafe.Pointer) {
+func goDrawCallback(handle C.WindowHandle, _ unsafe.Pointer) {
 	windowRegistryMu.RLock()
 	window, ok := windowRegistry[handle]
 	windowRegistryMu.RUnlock()
@@ -333,7 +333,7 @@ func goDrawCallback(handle C.WindowHandle, userData unsafe.Pointer) {
 }
 
 //export goResizeCallback
-func goResizeCallback(handle C.WindowHandle, width, height C.int, userData unsafe.Pointer) {
+func goResizeCallback(handle C.WindowHandle, width, height C.int, _ unsafe.Pointer) {
 	windowRegistryMu.RLock()
 	window, ok := windowRegistry[handle]
 	windowRegistryMu.RUnlock()
@@ -349,7 +349,7 @@ func goResizeCallback(handle C.WindowHandle, width, height C.int, userData unsaf
 }
 
 //export goMouseCallback
-func goMouseCallback(handle C.WindowHandle, button, action C.int, x, y C.double, userData unsafe.Pointer) {
+func goMouseCallback(handle C.WindowHandle, button, action C.int, x, y C.double, _ unsafe.Pointer) {
 	windowRegistryMu.RLock()
 	window, ok := windowRegistry[handle]
 	windowRegistryMu.RUnlock()
@@ -360,7 +360,7 @@ func goMouseCallback(handle C.WindowHandle, button, action C.int, x, y C.double,
 }
 
 //export goKeyCallback
-func goKeyCallback(handle C.WindowHandle, key, action C.int, userData unsafe.Pointer) {
+func goKeyCallback(handle C.WindowHandle, key, action C.int, _ unsafe.Pointer) {
 	windowRegistryMu.RLock()
 	window, ok := windowRegistry[handle]
 	windowRegistryMu.RUnlock()
