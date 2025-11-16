@@ -358,6 +358,230 @@ func (c *CurvedAnimation) RemoveStatusListener(listener func(AnimationStatus)) {
 	c.parent.RemoveStatusListener(listener)
 }
 
+// SizeTween interpolates between two sizes
+type SizeTween struct {
+	begin *Size
+	end   *Size
+}
+
+// Size represents width and height
+type Size struct {
+	Width  float64
+	Height float64
+}
+
+// NewSizeTween creates a new size tween
+func NewSizeTween(begin, end *Size) *SizeTween {
+	return &SizeTween{
+		begin: begin,
+		end:   end,
+	}
+}
+
+// Lerp linearly interpolates between begin and end sizes
+func (s *SizeTween) Lerp(value float64) *Size {
+	return &Size{
+		Width:  s.begin.Width + (s.end.Width-s.begin.Width)*value,
+		Height: s.begin.Height + (s.end.Height-s.begin.Height)*value,
+	}
+}
+
+// AlignmentTween interpolates between two alignments
+type AlignmentTween struct {
+	begin *Alignment
+	end   *Alignment
+}
+
+// Alignment represents alignment values
+type Alignment struct {
+	X float64 // -1.0 (left) to 1.0 (right)
+	Y float64 // -1.0 (top) to 1.0 (bottom)
+}
+
+// NewAlignmentTween creates a new alignment tween
+func NewAlignmentTween(begin, end *Alignment) *AlignmentTween {
+	return &AlignmentTween{
+		begin: begin,
+		end:   end,
+	}
+}
+
+// Lerp linearly interpolates between begin and end alignments
+func (a *AlignmentTween) Lerp(value float64) *Alignment {
+	return &Alignment{
+		X: a.begin.X + (a.end.X-a.begin.X)*value,
+		Y: a.begin.Y + (a.end.Y-a.begin.Y)*value,
+	}
+}
+
+// EdgeInsetsTween interpolates between two edge insets
+type EdgeInsetsTween struct {
+	begin *EdgeInsets
+	end   *EdgeInsets
+}
+
+// EdgeInsets represents padding/margin values
+type EdgeInsets struct {
+	Top    float64
+	Right  float64
+	Bottom float64
+	Left   float64
+}
+
+// NewEdgeInsetsTween creates a new edge insets tween
+func NewEdgeInsetsTween(begin, end *EdgeInsets) *EdgeInsetsTween {
+	return &EdgeInsetsTween{
+		begin: begin,
+		end:   end,
+	}
+}
+
+// Lerp linearly interpolates between begin and end edge insets
+func (e *EdgeInsetsTween) Lerp(value float64) *EdgeInsets {
+	return &EdgeInsets{
+		Top:    e.begin.Top + (e.end.Top-e.begin.Top)*value,
+		Right:  e.begin.Right + (e.end.Right-e.begin.Right)*value,
+		Bottom: e.begin.Bottom + (e.end.Bottom-e.begin.Bottom)*value,
+		Left:   e.begin.Left + (e.end.Left-e.begin.Left)*value,
+	}
+}
+
+// BorderRadiusTween interpolates between two border radius values
+type BorderRadiusTween struct {
+	begin float64
+	end   float64
+}
+
+// NewBorderRadiusTween creates a new border radius tween
+func NewBorderRadiusTween(begin, end float64) *BorderRadiusTween {
+	return &BorderRadiusTween{
+		begin: begin,
+		end:   end,
+	}
+}
+
+// Lerp linearly interpolates between begin and end border radius
+func (b *BorderRadiusTween) Lerp(value float64) float64 {
+	return b.begin + (b.end-b.begin)*value
+}
+
+// DecorationTween interpolates between two box decorations
+type DecorationTween struct {
+	begin *BoxDecoration
+	end   *BoxDecoration
+}
+
+// BoxDecoration represents container decoration
+type BoxDecoration struct {
+	Color        *Color
+	BorderRadius float64
+	Border       *Border
+}
+
+// Border represents border properties
+type Border struct {
+	Color *Color
+	Width float64
+}
+
+// NewDecorationTween creates a new decoration tween
+func NewDecorationTween(begin, end *BoxDecoration) *DecorationTween {
+	return &DecorationTween{
+		begin: begin,
+		end:   end,
+	}
+}
+
+// Lerp linearly interpolates between begin and end decorations
+func (d *DecorationTween) Lerp(value float64) *BoxDecoration {
+	result := &BoxDecoration{
+		BorderRadius: d.begin.BorderRadius + (d.end.BorderRadius-d.begin.BorderRadius)*value,
+	}
+
+	// Interpolate colors
+	if d.begin.Color != nil && d.end.Color != nil {
+		colorTween := NewColorTween(d.begin.Color, d.end.Color)
+		result.Color = colorTween.Lerp(value)
+	} else if d.end.Color != nil {
+		result.Color = d.end.Color
+	} else {
+		result.Color = d.begin.Color
+	}
+
+	// Interpolate border
+	if d.begin.Border != nil && d.end.Border != nil {
+		borderColorTween := NewColorTween(d.begin.Border.Color, d.end.Border.Color)
+		result.Border = &Border{
+			Color: borderColorTween.Lerp(value),
+			Width: d.begin.Border.Width + (d.end.Border.Width-d.begin.Border.Width)*value,
+		}
+	} else if d.end.Border != nil {
+		result.Border = d.end.Border
+	} else {
+		result.Border = d.begin.Border
+	}
+
+	return result
+}
+
+// AnimationStatusListener is a function that listens to animation status changes
+type AnimationStatusListener func(AnimationStatus)
+
+// TickerProvider provides a ticker for animations
+type TickerProvider interface {
+	CreateTicker() *Ticker
+}
+
+// Ticker provides regular callbacks for animations
+type Ticker struct {
+	onTick   func(time.Duration)
+	stopChan chan bool
+	running  bool
+}
+
+// NewTicker creates a new ticker
+func NewTicker(onTick func(time.Duration)) *Ticker {
+	return &Ticker{
+		onTick:   onTick,
+		stopChan: make(chan bool),
+		running:  false,
+	}
+}
+
+// Start starts the ticker
+func (t *Ticker) Start() {
+	if t.running {
+		return
+	}
+	t.running = true
+	go func() {
+		ticker := time.NewTicker(16 * time.Millisecond) // ~60 FPS
+		defer ticker.Stop()
+		startTime := time.Now()
+
+		for {
+			select {
+			case <-ticker.C:
+				elapsed := time.Since(startTime)
+				if t.onTick != nil {
+					t.onTick(elapsed)
+				}
+			case <-t.stopChan:
+				return
+			}
+		}
+	}()
+}
+
+// Stop stops the ticker
+func (t *Ticker) Stop() {
+	if !t.running {
+		return
+	}
+	t.running = false
+	t.stopChan <- true
+}
+
 // Common curve instances
 var (
 	Linear       = &LinearCurve{}
