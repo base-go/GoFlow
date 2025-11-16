@@ -70,7 +70,7 @@ myapp/
 go get github.com/base-go/GoFlow
 ```
 
-## Quick Start
+## Signals Quick Start
 
 ```go
 import "github.com/base-go/GoFlow/pkg/core/signals"
@@ -269,6 +269,8 @@ GoFlow includes a comprehensive set of widgets inspired by Flutter:
 - **CupertinoTextField**: iOS text field
 - **CupertinoSwitch**: iOS switch
 - **CupertinoSlider**: iOS slider
+
+📚 **See [docs/widgets/](docs/widgets/) for detailed widget documentation with examples**
 
 ## 📖 Examples
 
