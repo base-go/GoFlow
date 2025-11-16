@@ -160,12 +160,18 @@
 
 #### 5. Navigation & Routing
 ```go
-- [ ] Navigator widget
-- [ ] Route management
-- [ ] Named routes
-- [ ] Route transitions
-- [ ] Dialog support
-- [ ] Bottom sheets
+- [x] Navigator widget
+- [x] Route management
+- [x] Named routes
+- [x] Route transitions
+- [x] Dialog support
+- [x] Bottom sheets
+- [x] GetX-style global navigation (Get.To, Get.Back, etc.)
+- [x] Snackbar support
+- [x] Alert dialogs
+- [x] Modal bottom sheets
+- [x] Navigation observers
+- [x] Route stack management
 ```
 
 #### 6. Animation System
@@ -384,6 +390,18 @@ Rendering:
 ## 📝 Notes
 
 ### Recent Changes (November 16, 2024)
+- **GetX-Style Navigation System Complete**: Full navigation and routing implementation in `pkg/navigation/`
+  - Global navigation manager (Get.To, Get.Back, Get.Off, Get.OffAll, etc.)
+  - Navigator widget with reactive route stack using signals
+  - Named routes registry and route builders
+  - Route transitions (fade, slide, zoom, platform-specific)
+  - Dialog support with barriers and dismissibility (Get.Dialog, ShowAlertDialog)
+  - Bottom sheet support with modal variants (Get.BottomSheet, ShowModalBottomSheet)
+  - Snackbar system for temporary notifications
+  - Navigation observers for tracking route changes
+  - GlobalKey for widget access
+  - Full GetX API compatibility with Go naming conventions
+  - Comprehensive example in `examples/navigation-demo/`
 - **macOS Input Integration Complete**: Added full mouse and keyboard event handling to macOS backend
   - Mouse events: click, drag, move with proper coordinate conversion
   - Keyboard events: key press/release with key codes
@@ -409,6 +427,7 @@ Rendering:
 - Using native platform graphics APIs instead of OpenGL/Vulkan initially
 - Flutter-style project structure for familiarity
 - Three-tree architecture proven successful in Flutter
+- Adopted GetX-style navigation for simplicity and developer experience (global Get object instead of BuildContext-based navigation)
 
 ### Technical Debt
 - Need to refactor constraint system for better performance
