@@ -2,6 +2,7 @@ package navigation
 
 import (
 	goflow "github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
 )
 
 // Route represents a navigation route
@@ -102,39 +103,78 @@ func GetTransitionBuilder(transition Transition) TransitionBuilder {
 
 // FadeTransition creates a fade transition
 func FadeTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper opacity animation when animation system is ready
-	// For now, just return the child
-	return child
+	return &widgets.Opacity{
+		Opacity: animation,
+		Child:   child,
+	}
 }
 
-// SlideRightTransition creates a slide from right transition
+// SlideRightTransition creates a slide from right transition (iOS style)
 func SlideRightTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper slide animation when animation system is ready
-	return child
+	// Slide from right to left as animation goes from 0 to 1
+	offset := (1.0 - animation) * 400.0 // Screen width approximation
+	return &widgets.Transform{
+		Transform: &widgets.TranslationTransform{
+			X: offset,
+			Y: 0,
+		},
+		Child: child,
+	}
 }
 
 // SlideLeftTransition creates a slide from left transition
 func SlideLeftTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper slide animation
-	return child
+	// Slide from left to right as animation goes from 0 to 1
+	offset := -(1.0 - animation) * 400.0
+	return &widgets.Transform{
+		Transform: &widgets.TranslationTransform{
+			X: offset,
+			Y: 0,
+		},
+		Child: child,
+	}
 }
 
-// SlideUpTransition creates a slide from bottom transition
+// SlideUpTransition creates a slide from bottom transition (Material style)
 func SlideUpTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper slide animation
-	return child
+	// Slide from bottom to top as animation goes from 0 to 1
+	offset := (1.0 - animation) * 600.0 // Screen height approximation
+	return &widgets.Transform{
+		Transform: &widgets.TranslationTransform{
+			X: 0,
+			Y: offset,
+		},
+		Child: child,
+	}
 }
 
 // SlideDownTransition creates a slide from top transition
 func SlideDownTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper slide animation
-	return child
+	// Slide from top to bottom as animation goes from 0 to 1
+	offset := -(1.0 - animation) * 600.0
+	return &widgets.Transform{
+		Transform: &widgets.TranslationTransform{
+			X: 0,
+			Y: offset,
+		},
+		Child: child,
+	}
 }
 
 // ZoomTransition creates a zoom transition
 func ZoomTransition(child goflow.Widget, animation float64) goflow.Widget {
-	// TODO: Implement proper zoom animation
-	return child
+	// Combine scale and fade for a smooth zoom effect
+	scaleChild := &widgets.Transform{
+		Transform: &widgets.ScaleTransform{
+			ScaleX: animation,
+			ScaleY: animation,
+		},
+		Child: child,
+	}
+	return &widgets.Opacity{
+		Opacity: animation,
+		Child:   scaleChild,
+	}
 }
 
 // NoTransition returns the child without any transition
