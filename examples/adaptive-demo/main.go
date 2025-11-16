@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/base-go/GoFlow/adaptive"
-	"github.com/base-go/GoFlow/goflow"
-	"github.com/base-go/GoFlow/widgets"
+	"github.com/base-go/GoFlow/pkg/ui/adaptive"
+	"github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
 )
 
 // AdaptiveDemoApp demonstrates platform-adaptive widgets

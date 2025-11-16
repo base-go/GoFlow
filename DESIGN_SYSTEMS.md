@@ -20,7 +20,7 @@ Adaptive widgets automatically select the appropriate design system based on the
 ### Usage
 
 ```go
-import "github.com/base-go/GoFlow/adaptive"
+import "github.com/base-go/GoFlow/pkg/ui/adaptive"
 
 // Create a button that automatically adapts to the platform
 button := adaptive.NewButton("Click Me", func() {
@@ -39,7 +39,7 @@ appBar := adaptive.NewAppBar(title)
 GoFlow automatically detects the platform at runtime:
 
 ```go
-import "github.com/base-go/GoFlow/goflow"
+import "github.com/base-go/GoFlow/pkg/core/framework"
 
 platform := goflow.GetPlatform() // Returns: PlatformAndroid, PlatformIOS, etc.
 theme := platform.DefaultTheme()  // Returns: "material" or "cupertino"
@@ -66,7 +66,7 @@ Material Design is Google's design system, used primarily on Android but also su
 ### Widgets
 
 ```go
-import "github.com/base-go/GoFlow/material"
+import "github.com/base-go/GoFlow/pkg/ui/material"
 
 // Theme
 theme := material.DefaultLightTheme()
@@ -123,7 +123,7 @@ Cupertino is Apple's design language, providing an iOS and macOS native look and
 ### Widgets
 
 ```go
-import "github.com/base-go/GoFlow/cupertino"
+import "github.com/base-go/GoFlow/pkg/ui/cupertino"
 
 // Theme
 theme := cupertino.DefaultLightTheme()

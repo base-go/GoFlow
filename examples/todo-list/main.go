@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/base-go/GoFlow/signals"
+	"github.com/base-go/GoFlow/pkg/core/signals"
 )
 
 type Todo struct {

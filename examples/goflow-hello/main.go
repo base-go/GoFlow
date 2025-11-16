@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/base-go/GoFlow/goflow"
-	"github.com/base-go/GoFlow/widgets"
+	"github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
 )
 
 // HelloApp is a simple "Hello, GoFlow!" application

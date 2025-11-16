@@ -104,9 +104,9 @@ Your generated project imports these packages:
 
 ```go
 import (
-    "github.com/base-go/GoFlow/goflow"
-    "github.com/base-go/GoFlow/signals"
-    "github.com/base-go/GoFlow/widgets"
+    "github.com/base-go/GoFlow/pkg/core/framework"
+    "github.com/base-go/GoFlow/pkg/core/signals"
+    "github.com/base-go/GoFlow/pkg/core/widgets"
 )
 ```
 
@@ -586,9 +586,9 @@ Your Machine:
 3. Resolves import: com.example/myapp/lib
               ↓
 4. Resolves imports in lib/main.go:
-   - github.com/base-go/GoFlow/goflow
-   - github.com/base-go/GoFlow/signals
-   - github.com/base-go/GoFlow/widgets
+   - github.com/base-go/GoFlow/pkg/core/framework
+   - github.com/base-go/GoFlow/pkg/core/signals
+   - github.com/base-go/GoFlow/pkg/core/widgets
               ↓
 5. Uses replace directive in go.mod
    → Loads from /path/to/GoFlow/

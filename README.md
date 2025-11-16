@@ -73,7 +73,7 @@ go get github.com/base-go/GoFlow
 ## Quick Start
 
 ```go
-import "github.com/base-go/GoFlow/signals"
+import "github.com/base-go/GoFlow/pkg/core/signals"
 
 // Create signals
 counter := signals.New(0)
@@ -172,7 +172,7 @@ GoFlow provides three approaches to building cross-platform UIs:
 Write once, automatically adapts to platform:
 
 ```go
-import "github.com/base-go/GoFlow/adaptive"
+import "github.com/base-go/GoFlow/pkg/ui/adaptive"
 
 // Button automatically becomes Material or Cupertino
 button := adaptive.NewButton("Click Me", func() {
@@ -192,11 +192,11 @@ Use Material Design or Cupertino explicitly:
 
 ```go
 // Material Design (Android, Web, Desktop)
-import "github.com/base-go/GoFlow/material"
+import "github.com/base-go/GoFlow/pkg/ui/material"
 btn := material.NewButton(child, onPressed)
 
 // Cupertino (iOS, macOS)
-import "github.com/base-go/GoFlow/cupertino"
+import "github.com/base-go/GoFlow/pkg/ui/cupertino"
 btn := cupertino.NewButton(child, onPressed)
 ```
 

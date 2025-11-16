@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/base-go/GoFlow/signals"
+	"github.com/base-go/GoFlow/pkg/core/signals"
 )
 
 func main() {

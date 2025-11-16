@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/base-go/GoFlow/goflow"
-	"github.com/base-go/GoFlow/signals"
-	"github.com/base-go/GoFlow/widgets"
+	"github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/signals"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
 )
 
 // CounterApp is the root widget for our counter application

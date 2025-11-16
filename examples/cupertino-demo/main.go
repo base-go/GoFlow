@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/base-go/GoFlow/cupertino"
-	"github.com/base-go/GoFlow/goflow"
-	"github.com/base-go/GoFlow/widgets"
+	"github.com/base-go/GoFlow/pkg/ui/cupertino"
+	"github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
 )
 
 // CupertinoDemoApp demonstrates Cupertino (iOS/macOS) widgets
