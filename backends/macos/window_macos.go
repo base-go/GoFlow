@@ -11,6 +11,8 @@ package macos
 // Forward declarations for callbacks
 extern void goDrawCallback(WindowHandle window, void* userData);
 extern void goResizeCallback(WindowHandle window, int width, int height, void* userData);
+extern void goMouseCallback(WindowHandle window, int button, int action, double x, double y, void* userData);
+extern void goKeyCallback(WindowHandle window, int key, int action, void* userData);
 */
 import "C"
 import (
@@ -24,6 +26,12 @@ type DrawFunc func(canvas *CoreGraphicsCanvas)
 // ResizeFunc is called when the window is resized
 type ResizeFunc func(width, height int)
 
+// MouseFunc is called on mouse events
+type MouseFunc func(button, action int, x, y float64)
+
+// KeyFunc is called on keyboard events
+type KeyFunc func(key, action int)
+
 // Window represents a macOS window
 type Window struct {
 	handle     C.WindowHandle
@@ -32,6 +40,8 @@ type Window struct {
 	title      string
 	drawFunc   DrawFunc
 	resizeFunc ResizeFunc
+	mouseFunc  MouseFunc
+	keyFunc    KeyFunc
 	mu         sync.Mutex
 }
 
@@ -274,6 +284,28 @@ func (w *Window) SetResizeFunc(fn ResizeFunc) {
 	w.resizeFunc = fn
 }
 
+// SetMouseFunc sets the mouse callback function
+func (w *Window) SetMouseFunc(fn MouseFunc) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.mouseFunc = fn
+	if w.handle != nil {
+		C.setMouseCallback(w.handle, C.MouseCallback(C.goMouseCallback), unsafe.Pointer(w.handle))
+	}
+}
+
+// SetKeyFunc sets the keyboard callback function
+func (w *Window) SetKeyFunc(fn KeyFunc) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.keyFunc = fn
+	if w.handle != nil {
+		C.setKeyCallback(w.handle, C.KeyCallback(C.goKeyCallback), unsafe.Pointer(w.handle))
+	}
+}
+
 // InitApp initializes the Cocoa application
 // This must be called before creating any windows
 func InitApp() {
@@ -313,5 +345,27 @@ func goResizeCallback(handle C.WindowHandle, width, height C.int, userData unsaf
 		if window.resizeFunc != nil {
 			window.resizeFunc(int(width), int(height))
 		}
+	}
+}
+
+//export goMouseCallback
+func goMouseCallback(handle C.WindowHandle, button, action C.int, x, y C.double, userData unsafe.Pointer) {
+	windowRegistryMu.RLock()
+	window, ok := windowRegistry[handle]
+	windowRegistryMu.RUnlock()
+
+	if ok && window.mouseFunc != nil {
+		window.mouseFunc(int(button), int(action), float64(x), float64(y))
+	}
+}
+
+//export goKeyCallback
+func goKeyCallback(handle C.WindowHandle, key, action C.int, userData unsafe.Pointer) {
+	windowRegistryMu.RLock()
+	window, ok := windowRegistry[handle]
+	windowRegistryMu.RUnlock()
+
+	if ok && window.keyFunc != nil {
+		window.keyFunc(int(key), int(action))
 	}
 }

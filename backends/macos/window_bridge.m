@@ -18,6 +18,23 @@ void runApp(void) {
     }
 }
 
+// Custom window delegate to handle events (declared before view so view can reference it)
+@interface GoFlowWindowDelegate : NSObject <NSWindowDelegate> {
+    ResizeCallback resizeCallback;
+    void* resizeUserData;
+    MouseCallback mouseCallback;
+    void* mouseUserData;
+    KeyCallback keyCallback;
+    void* keyUserData;
+}
+@property (nonatomic, assign) ResizeCallback resizeCallback;
+@property (nonatomic, assign) void* resizeUserData;
+@property (nonatomic, assign) MouseCallback mouseCallback;
+@property (nonatomic, assign) void* mouseUserData;
+@property (nonatomic, assign) KeyCallback keyCallback;
+@property (nonatomic, assign) void* keyUserData;
+@end
+
 // Custom view that handles drawing
 @interface GoFlowView : NSView {
     void* graphicsContext;
@@ -163,23 +180,6 @@ void runApp(void) {
     }
 }
 
-@end
-
-// Custom window delegate to handle events
-@interface GoFlowWindowDelegate : NSObject <NSWindowDelegate> {
-    ResizeCallback resizeCallback;
-    void* resizeUserData;
-    MouseCallback mouseCallback;
-    void* mouseUserData;
-    KeyCallback keyCallback;
-    void* keyUserData;
-}
-@property (nonatomic, assign) ResizeCallback resizeCallback;
-@property (nonatomic, assign) void* resizeUserData;
-@property (nonatomic, assign) MouseCallback mouseCallback;
-@property (nonatomic, assign) void* mouseUserData;
-@property (nonatomic, assign) KeyCallback keyCallback;
-@property (nonatomic, assign) void* keyUserData;
 @end
 
 @implementation GoFlowWindowDelegate
@@ -465,9 +465,23 @@ void setResizeCallback(WindowHandle window, ResizeCallback callback, void* userD
 }
 
 void setMouseCallback(WindowHandle window, MouseCallback callback, void* userData) {
-    // TODO: Implement mouse event handling
+    if (!window) return;
+
+    @autoreleasepool {
+        NSWindow *nsWindow = (__bridge NSWindow*)window;
+        GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[nsWindow delegate];
+        delegate.mouseCallback = callback;
+        delegate.mouseUserData = userData;
+    }
 }
 
 void setKeyCallback(WindowHandle window, KeyCallback callback, void* userData) {
-    // TODO: Implement keyboard event handling
+    if (!window) return;
+
+    @autoreleasepool {
+        NSWindow *nsWindow = (__bridge NSWindow*)window;
+        GoFlowWindowDelegate *delegate = (GoFlowWindowDelegate*)[nsWindow delegate];
+        delegate.keyCallback = callback;
+        delegate.keyUserData = userData;
+    }
 }

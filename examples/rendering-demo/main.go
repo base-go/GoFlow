@@ -74,6 +74,31 @@ func main() {
 		fmt.Printf("Window resized to: %dx%d\n", width, height)
 	})
 
+	// Set mouse callback
+	window.SetMouseFunc(func(button, action int, x, y float64) {
+		actionStr := "unknown"
+		switch action {
+		case 0:
+			actionStr = "up"
+		case 1:
+			actionStr = "down"
+		case 2:
+			actionStr = "move"
+		}
+		if action != 2 { // Don't spam with mouse moves
+			fmt.Printf("Mouse %s at (%.1f, %.1f), button: %d\n", actionStr, x, y, button)
+		}
+	})
+
+	// Set keyboard callback
+	window.SetKeyFunc(func(key, action int) {
+		actionStr := "down"
+		if action == 0 {
+			actionStr = "up"
+		}
+		fmt.Printf("Key %s: %d\n", actionStr, key)
+	})
+
 	// Set up animation timer
 	go func() {
 		ticker := time.NewTicker(16 * time.Millisecond) // ~60 FPS
