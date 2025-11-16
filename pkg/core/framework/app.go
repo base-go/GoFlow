@@ -129,3 +129,20 @@ func (a *App) findRenderObject(element Element) RenderObject {
 func (a *App) SetCanvas(canvas Canvas) {
 	a.canvas = canvas
 }
+
+// GetRootWidget returns the root widget
+func (a *App) GetRootWidget() Widget {
+	return a.rootWidget
+}
+
+// UpdateRootWidget updates the root widget (useful for hot reload)
+func (a *App) UpdateRootWidget(newWidget Widget) {
+	a.rootWidget = newWidget
+}
+
+// Rebuild rebuilds the entire widget tree
+func (a *App) Rebuild() {
+	a.Build()
+	a.Layout()
+	a.Render()
+}
