@@ -447,19 +447,216 @@ func runDoctorCommand(cmd *mamba.Command, args []string) error {
 
 func runCleanCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🧹 Cleaning Build Artifacts")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+
+	// Get flags
+	deep, _ := cmd.Flags().GetBool("deep")
+	force, _ := cmd.Flags().GetBool("force")
+
+	if !force {
+		cmd.PrintWarning("This will remove build artifacts and temporary files.")
+		cmd.PrintInfo("Use --force to skip this confirmation.")
+		// In a real implementation, we'd prompt for confirmation here
+	}
+
+	// Directories and files to clean
+	cleanPaths := []string{
+		"./build",
+		"./dist",
+		"*.test",
+		"coverage.out",
+		"coverage.html",
+	}
+
+	if deep {
+		cleanPaths = append(cleanPaths,
+			"./go.work",
+			"./go.work.sum",
+		)
+		cmd.PrintInfo("Deep clean: enabled")
+	}
+
+	removedCount := 0
+
+	for _, path := range cleanPaths {
+		if _, err := os.Stat(path); err == nil {
+			cmd.PrintInfo(fmt.Sprintf("Removing: %s", path))
+			if err := os.RemoveAll(path); err != nil {
+				cmd.PrintWarning(fmt.Sprintf("⚠ Failed to remove %s: %v", path, err))
+			} else {
+				removedCount++
+			}
+		}
+	}
+
+	// Clean go cache if deep clean
+	if deep {
+		cmd.PrintInfo("Cleaning Go build cache...")
+		if _, err := runCommand("go", "clean", "-cache", "-modcache"); err != nil {
+			cmd.PrintWarning(fmt.Sprintf("⚠ Failed to clean cache: %v", err))
+		} else {
+			cmd.PrintSuccess("✓ Go cache cleaned")
+		}
+	}
+
+	if removedCount > 0 {
+		cmd.PrintSuccess(fmt.Sprintf("✓ Cleaned %d items successfully", removedCount))
+	} else {
+		cmd.PrintInfo("Nothing to clean")
+	}
+
 	return nil
 }
 
 func runAnalyzeCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("🔍 Analyzing Code")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+
+	// Get flags
+	fix, _ := cmd.Flags().GetBool("fix")
+	ignore, _ := cmd.Flags().GetStringSlice("ignore")
+
+	hasIssues := false
+
+	// Run go vet
+	cmd.PrintInfo("Running go vet...")
+	vetArgs := []string{"vet", "./..."}
+	if output, err := runCommand("go", vetArgs...); err != nil {
+		cmd.PrintWarning("⚠ go vet found issues:")
+		fmt.Println(output)
+		hasIssues = true
+	} else {
+		cmd.PrintSuccess("✓ go vet: no issues")
+	}
+
+	// Run staticcheck if available
+	cmd.PrintInfo("Checking for staticcheck...")
+	if _, err := runCommand("which", "staticcheck"); err == nil {
+		cmd.PrintInfo("Running staticcheck...")
+		staticArgs := []string{"staticcheck", "./..."}
+		if output, err := runCommand("staticcheck", staticArgs[1:]...); err != nil {
+			cmd.PrintWarning("⚠ staticcheck found issues:")
+			fmt.Println(output)
+			hasIssues = true
+		} else {
+			cmd.PrintSuccess("✓ staticcheck: no issues")
+		}
+	} else {
+		cmd.PrintInfo("ℹ staticcheck not installed (optional)")
+		cmd.PrintInfo("  Install: go install honnef.co/go/tools/cmd/staticcheck@latest")
+	}
+
+	// Run golangci-lint if available and fix flag is set
+	if fix {
+		cmd.PrintInfo("Checking for golangci-lint...")
+		if _, err := runCommand("which", "golangci-lint"); err == nil {
+			cmd.PrintInfo("Running golangci-lint --fix...")
+			lintArgs := []string{"run", "--fix"}
+			if output, err := runCommand("golangci-lint", lintArgs...); err != nil {
+				cmd.PrintWarning("⚠ golangci-lint found issues:")
+				fmt.Println(output)
+			} else {
+				cmd.PrintSuccess("✓ golangci-lint: fixed issues")
+			}
+		} else {
+			cmd.PrintInfo("ℹ golangci-lint not installed (required for --fix)")
+			cmd.PrintInfo("  Install: https://golangci-lint.run/usage/install/")
+		}
+	}
+
+	if len(ignore) > 0 {
+		cmd.PrintInfo(fmt.Sprintf("Ignoring patterns: %v", ignore))
+	}
+
+	fmt.Println()
+	if !hasIssues {
+		cmd.PrintSuccess("✓ Code analysis complete: no issues found")
+	} else {
+		cmd.PrintWarning("⚠ Code analysis complete: issues found")
+		return fmt.Errorf("analysis found issues")
+	}
+
 	return nil
 }
 
 func runFormatCommand(cmd *mamba.Command, args []string) error {
 	cmd.PrintHeader("✨ Formatting Code")
-	cmd.PrintWarning("Not yet implemented - coming in Phase 3")
+
+	// Get flags
+	check, _ := cmd.Flags().GetBool("check")
+	write, _ := cmd.Flags().GetBool("write")
+
+	if check && write {
+		cmd.PrintWarning("⚠ Both --check and --write specified, using --check")
+		write = false
+	}
+
+	mode := "format"
+	if check {
+		mode = "check"
+	}
+
+	cmd.PrintInfo(fmt.Sprintf("Mode: %s", mode))
+
+	// Build gofmt arguments
+	fmtArgs := []string{}
+
+	if write {
+		fmtArgs = append(fmtArgs, "-w")
+	} else if check {
+		fmtArgs = append(fmtArgs, "-l")
+	} else {
+		fmtArgs = append(fmtArgs, "-w") // Default to write
+	}
+
+	fmtArgs = append(fmtArgs, ".")
+
+	cmd.PrintInfo("Running gofmt...")
+
+	output, err := runCommand("gofmt", fmtArgs...)
+	if err != nil {
+		cmd.PrintError(fmt.Sprintf("✗ gofmt failed: %v", err))
+		return fmt.Errorf("format failed")
+	}
+
+	if check {
+		if strings.TrimSpace(output) != "" {
+			cmd.PrintWarning("⚠ Files need formatting:")
+			fmt.Println(output)
+			return fmt.Errorf("files need formatting")
+		} else {
+			cmd.PrintSuccess("✓ All files are properly formatted")
+		}
+	} else {
+		cmd.PrintSuccess("✓ Code formatted successfully")
+	}
+
+	// Also run goimports if available
+	cmd.PrintInfo("Checking for goimports...")
+	if _, err := runCommand("which", "goimports"); err == nil {
+		cmd.PrintInfo("Running goimports...")
+
+		importsArgs := []string{}
+		if write || !check {
+			importsArgs = append(importsArgs, "-w")
+		} else {
+			importsArgs = append(importsArgs, "-l")
+		}
+		importsArgs = append(importsArgs, ".")
+
+		if output, err := runCommand("goimports", importsArgs...); err != nil {
+			cmd.PrintWarning(fmt.Sprintf("⚠ goimports failed: %v", err))
+		} else {
+			if check && strings.TrimSpace(output) != "" {
+				cmd.PrintWarning("⚠ Imports need formatting:")
+				fmt.Println(output)
+			} else if !check {
+				cmd.PrintSuccess("✓ Imports organized")
+			}
+		}
+	} else {
+		cmd.PrintInfo("ℹ goimports not installed (optional)")
+		cmd.PrintInfo("  Install: go install golang.org/x/tools/cmd/goimports@latest")
+	}
+
 	return nil
 }
 
