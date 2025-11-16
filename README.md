@@ -302,7 +302,7 @@ Run benchmarks:
 go test ./signals -bench=. -benchmem
 ```
 
-## 🎨 Framework Status (v0.1.0)
+## 🎨 Framework Status (v0.2.0)
 
 ### ✅ What Works
 - Widget system (Text, Container, Column, Center)
@@ -312,15 +312,20 @@ go test ./signals -bench=. -benchmem
 - Three-tree architecture (Widget → Element → RenderObject)
 - CLI tool for project creation
 - Flutter-inspired project structure
+- **✨ macOS Rendering Backend** - Core Graphics with native windows
+- **✨ Text Rendering** - Core Text integration
+- **✨ Basic Shapes** - Rectangles, circles, lines
+- **✨ Event Loop** - Native event handling
 
 ### ⏳ In Progress
-- Native rendering backends (Core Graphics, Direct2D, Cairo)
-- GLFW window integration
-- Event handling (mouse, keyboard)
+- Mouse and keyboard event handling
+- Image loading and rendering
 - More built-in widgets
 - Design system implementations (Material, Cupertino)
 
 ### 🔮 Planned
+- Windows rendering backend (Direct2D)
+- Linux rendering backend (Cairo)
 - Hot reload
 - Animation system
 - Advanced layout widgets (Row, Stack, Grid)
