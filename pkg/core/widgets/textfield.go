@@ -394,33 +394,195 @@ func (tf *TextField) Build(context goflow.BuildContext) goflow.Widget {
 }
 
 func (tf *TextField) buildContent(context goflow.BuildContext) goflow.Widget {
-	// Display text or placeholder
-	displayText := tf.Controller.Text()
-	style := tf.Style
-
-	if displayText == "" && tf.Placeholder != "" {
-		displayText = tf.Placeholder
-		style = tf.PlaceholderStyle
-	}
-
-	// Obscure text if needed
-	if tf.ObscureText && displayText != "" && displayText != tf.Placeholder {
-		displayText = strings.Repeat("•", len(displayText))
-	}
-
-	// Create text widget
-	textWidget := &Text{
-		Data:  displayText,
-		Style: style,
+	// Create editable text with cursor
+	editableText := &EditableText{
+		Controller:       tf.Controller,
+		FocusNode:        tf.FocusNode,
+		Style:            tf.Style,
+		Placeholder:      tf.Placeholder,
+		PlaceholderStyle: tf.PlaceholderStyle,
+		ObscureText:      tf.ObscureText,
+		OnChanged:        tf.OnChanged,
+		OnSubmitted:      tf.OnSubmitted,
 	}
 
 	// Wrap in container with decoration
 	if tf.Decoration != nil {
 		return &Container{
-			Child:   textWidget,
+			Child:   editableText,
 			Padding: tf.Decoration.ContentPadding,
 		}
 	}
 
-	return textWidget
+	return editableText
+}
+
+// EditableText is the render object widget for editable text with cursor
+type EditableText struct {
+	goflow.BaseWidget
+	Controller       *TextEditingController
+	FocusNode        *FocusNode
+	Style            *goflow.TextStyle
+	Placeholder      string
+	PlaceholderStyle *goflow.TextStyle
+	ObscureText      bool
+	OnChanged        func(string)
+	OnSubmitted      func(string)
+}
+
+// CreateElement creates a render object element
+func (e *EditableText) CreateElement() goflow.Element {
+	return &RenderObjectElement{
+		BaseElement: goflow.BaseElement{},
+		widget:      e,
+		renderObject: &RenderEditableText{
+			BaseRenderBox:    goflow.NewBaseRenderBox(),
+			controller:       e.Controller,
+			focusNode:        e.FocusNode,
+			style:            e.Style,
+			placeholder:      e.Placeholder,
+			placeholderStyle: e.PlaceholderStyle,
+			obscureText:      e.ObscureText,
+			cursorVisible:    true,
+		},
+	}
+}
+
+// Build returns nil (this is a render object widget)
+func (e *EditableText) Build(context goflow.BuildContext) goflow.Widget {
+	return nil
+}
+
+// RenderEditableText is the render object for editable text
+type RenderEditableText struct {
+	*goflow.BaseRenderBox
+	controller       *TextEditingController
+	focusNode        *FocusNode
+	style            *goflow.TextStyle
+	placeholder      string
+	placeholderStyle *goflow.TextStyle
+	obscureText      bool
+	cursorVisible    bool
+	cursorBlinkTimer float64
+}
+
+// PerformLayout performs layout
+func (r *RenderEditableText) PerformLayout() {
+	constraints := r.GetConstraints()
+
+	// Get text to display
+	displayText := r.controller.Text()
+	style := r.style
+	if style == nil {
+		style = goflow.NewTextStyle()
+	}
+
+	if displayText == "" && r.placeholder != "" {
+		displayText = r.placeholder
+		if r.placeholderStyle != nil {
+			style = r.placeholderStyle
+		}
+	}
+
+	// Obscure text if needed
+	if r.obscureText && displayText != "" && displayText != r.placeholder {
+		displayText = strings.Repeat("•", len(displayText))
+	}
+
+	// Calculate text size (simplified)
+	width := float64(len(displayText)) * style.FontSize * 0.6
+	height := style.FontSize * 1.4 // Extra height for cursor
+
+	// Add padding for cursor
+	width += 2.0
+
+	size := constraints.Constrain(goflow.NewSize(width, height))
+	r.SetSize(size)
+}
+
+// Layout performs the layout
+func (r *RenderEditableText) Layout(constraints *goflow.Constraints) {
+	r.BaseRenderBox.Layout(constraints)
+	r.PerformLayout()
+}
+
+// Paint paints the editable text with cursor
+func (r *RenderEditableText) Paint(canvas goflow.Canvas, offset *goflow.Offset) {
+	// Get text to display
+	displayText := r.controller.Text()
+	style := r.style
+	if style == nil {
+		style = goflow.NewTextStyle()
+	}
+
+	isPlaceholder := false
+	if displayText == "" && r.placeholder != "" {
+		displayText = r.placeholder
+		isPlaceholder = true
+		if r.placeholderStyle != nil {
+			style = r.placeholderStyle
+		}
+	}
+
+	// Obscure text if needed
+	obscuredText := displayText
+	if r.obscureText && displayText != "" && !isPlaceholder {
+		obscuredText = strings.Repeat("•", len(displayText))
+	}
+
+	// Draw text
+	if obscuredText != "" {
+		canvas.DrawText(obscuredText, offset, style)
+	}
+
+	// Draw cursor if focused and visible
+	if r.focusNode != nil && r.focusNode.HasFocus() && r.cursorVisible {
+		cursorPosition := r.controller.CursorPosition()
+
+		// Calculate cursor X position (simplified)
+		cursorX := offset.X
+		if cursorPosition > 0 {
+			textBeforeCursor := obscuredText
+			if cursorPosition < len(obscuredText) {
+				textBeforeCursor = obscuredText[:cursorPosition]
+			}
+			cursorX += float64(len(textBeforeCursor)) * style.FontSize * 0.6
+		}
+
+		// Draw cursor line
+		paint := goflow.NewPaint()
+		paint.Color = style.Color
+		if paint.Color == nil {
+			paint.Color = goflow.NewColor(0, 0, 0, 255)
+		}
+		paint.StrokeWidth = 2.0
+
+		cursorTop := offset.Y
+		cursorBottom := offset.Y + style.FontSize * 1.2
+
+		canvas.DrawLine(
+			goflow.NewOffset(cursorX, cursorTop),
+			goflow.NewOffset(cursorX, cursorBottom),
+			paint,
+		)
+	}
+
+	// Draw selection if any
+	start, end, hasSelection := r.controller.Selection()
+	if hasSelection && start != end {
+		// Calculate selection bounds (simplified)
+		selectionStart := offset.X + float64(start)*style.FontSize*0.6
+		selectionEnd := offset.X + float64(end)*style.FontSize*0.6
+		selectionWidth := selectionEnd - selectionStart
+
+		// Draw selection background
+		paint := goflow.NewPaint()
+		paint.Color = goflow.NewColor(33, 150, 243, 100) // Semi-transparent blue
+
+		selectionRect := goflow.NewRect(
+			goflow.NewOffset(selectionStart, offset.Y),
+			goflow.NewSize(selectionWidth, style.FontSize*1.2),
+		)
+		canvas.DrawRect(selectionRect, paint)
+	}
 }
