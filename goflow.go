@@ -169,7 +169,9 @@ var (
 	NewColor     = framework.NewColor
 	NewPaint     = framework.NewPaint
 	NewTextStyle = framework.NewTextStyle
-	NewEdgeInsets = framework.NewEdgeInsets
+	NewEdgeInsets          = framework.NewEdgeInsets
+	NewEdgeInsetsAll       = framework.NewEdgeInsetsAll
+	NewEdgeInsetsSymmetric = framework.NewEdgeInsetsSymmetric
 )
 
 // ============================================================================
@@ -222,12 +224,6 @@ type Icon = widgets.Icon
 // Image displays an image.
 type Image = widgets.Image
 
-// Avatar displays a profile picture or placeholder.
-type Avatar = widgets.Avatar
-
-// CircleAvatar displays a circular profile picture.
-type CircleAvatar = widgets.CircleAvatar
-
 // Badge displays a notification badge.
 type Badge = widgets.Badge
 
@@ -259,8 +255,14 @@ type Switch = widgets.Switch
 // Slider is a range selection widget.
 type Slider = widgets.Slider
 
-// Dropdown is a dropdown menu widget.
-type Dropdown = widgets.Dropdown
+// RangeSlider is a dual-handle range selection widget.
+type RangeSlider = widgets.RangeSlider
+
+// RangeValues represents a range of values for RangeSlider.
+type RangeValues = widgets.RangeValues
+
+// DropdownButton is a dropdown menu widget.
+type DropdownButton = widgets.DropdownButton
 
 // Form manages form fields and validation.
 type Form = widgets.Form
@@ -397,28 +399,41 @@ type SignalSlice[T any] = signals.SignalSlice[T]
 type SignalMap[K comparable, V any] = signals.SignalMap[K, V]
 
 // Signal creation and management functions
-var (
-	// CreateSignal creates a new signal with an initial value.
-	CreateSignal = signals.New
 
-	// CreateComputed creates a computed value that derives from other signals.
-	CreateComputed = signals.NewComputed
+// CreateSignal creates a new signal with an initial value.
+func CreateSignal[T any](initialValue T) *Signal[T] {
+	return signals.New(initialValue)
+}
 
-	// CreateEffect creates a side effect that runs when dependencies change.
-	CreateEffect = signals.NewEffect
+// CreateComputed creates a computed value that derives from other signals.
+func CreateComputed[T any](computeFn func() T) *Computed[T] {
+	return signals.NewComputed(computeFn)
+}
 
-	// Batch batches multiple signal updates into a single notification.
-	Batch = signals.Batch
+// CreateEffect creates a side effect that runs when dependencies change.
+func CreateEffect(effectFn func()) func() {
+	return signals.NewEffect(effectFn)
+}
 
-	// Untracked runs a function without tracking signal dependencies.
-	Untracked = signals.Untracked
+// Batch batches multiple signal updates into a single notification.
+func Batch(fn func()) {
+	signals.Batch(fn)
+}
 
-	// CreateSignalSlice creates a reactive slice.
-	CreateSignalSlice = signals.NewSlice
+// Untracked runs a function without tracking signal dependencies.
+func Untracked[T any](fn func() T) T {
+	return signals.Untracked(fn)
+}
 
-	// CreateSignalMap creates a reactive map.
-	CreateSignalMap = signals.NewMap
-)
+// CreateSignalSlice creates a reactive slice.
+func CreateSignalSlice[T any](initialValue []T) *SignalSlice[T] {
+	return signals.NewSlice(initialValue)
+}
+
+// CreateSignalMap creates a reactive map.
+func CreateSignalMap[K comparable, V any](initialValue map[K]V) *SignalMap[K, V] {
+	return signals.NewMap(initialValue)
+}
 
 // ============================================================================
 // Animation System
@@ -457,7 +472,7 @@ type (
 	MaterialSlider                = material.Slider
 	MaterialDialog                = material.Dialog
 	MaterialAlertDialog           = material.AlertDialog
-	MaterialTheme                 = material.Theme
+	MaterialTheme                 = material.MaterialTheme
 )
 
 // Material theme functions
@@ -472,12 +487,15 @@ var (
 
 // Cupertino widget types with "Cupertino" prefix
 type (
-	CupertinoScaffold       = cupertino.Scaffold
+	CupertinoPageScaffold   = cupertino.CupertinoPageScaffold
+	CupertinoTabScaffold    = cupertino.CupertinoTabScaffold
 	CupertinoNavigationBar  = cupertino.NavigationBar
 	CupertinoButton         = cupertino.Button
-	CupertinoTextField      = cupertino.TextField
+	CupertinoTextField      = cupertino.CupertinoTextField
+	CupertinoSwitch         = cupertino.CupertinoSwitch
+	CupertinoSlider         = cupertino.CupertinoSlider
 	CupertinoCard           = cupertino.Card
-	CupertinoTheme          = cupertino.Theme
+	CupertinoTheme          = cupertino.CupertinoTheme
 )
 
 // ============================================================================
@@ -542,7 +560,6 @@ type (
 	MouseEvent           = input.MouseEvent
 	TouchEvent           = input.TouchEvent
 	EventDispatcher      = input.EventDispatcher
-	GestureRecognizer    = input.GestureRecognizer
 	MultiTouchRecognizer = input.MultiTouchRecognizer
 )
 

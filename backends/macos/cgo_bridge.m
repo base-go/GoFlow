@@ -59,9 +59,8 @@ void* createGraphicsContext(int width, int height) {
         CGContextSetShouldAntialias(cgContext, true);
         CGContextSetInterpolationQuality(cgContext, kCGInterpolationHigh);
 
-        // Flip coordinate system to match top-left origin (like most UI frameworks)
-        CGContextTranslateCTM(cgContext, 0, height);
-        CGContextScaleCTM(cgContext, 1.0, -1.0);
+        // Keep Core Graphics natural coordinate system (bottom-left origin)
+        // We'll convert coordinates in drawing functions as needed
 
         // Allocate graphics context structure
         GraphicsContext *gc = malloc(sizeof(GraphicsContext));
@@ -132,7 +131,9 @@ void drawRect(void* ctx, double x, double y, double w, double h,
         CanvasContext *canvas = (CanvasContext*)ctx;
         CGContextRef context = canvas->gc->context;
 
-        CGRect rect = CGRectMake(x, y, w, h);
+        // Convert from UI coordinates (top-left) to Core Graphics coordinates (bottom-left)
+        double cgY = canvas->gc->height - y - h;
+        CGRect rect = CGRectMake(x, cgY, w, h);
 
         if (filled) {
             CGContextSetRGBFillColor(context, r, g, b, a);
@@ -154,7 +155,9 @@ void drawCircle(void* ctx, double cx, double cy, double radius,
         CanvasContext *canvas = (CanvasContext*)ctx;
         CGContextRef context = canvas->gc->context;
 
-        CGRect rect = CGRectMake(cx - radius, cy - radius, radius * 2, radius * 2);
+        // Convert from UI coordinates (top-left) to Core Graphics coordinates (bottom-left)
+        double cgY = canvas->gc->height - cy - radius;
+        CGRect rect = CGRectMake(cx - radius, cgY, radius * 2, radius * 2);
 
         if (filled) {
             CGContextSetRGBFillColor(context, r, g, b, a);
@@ -176,12 +179,16 @@ void drawLine(void* ctx, double x1, double y1, double x2, double y2,
         CanvasContext *canvas = (CanvasContext*)ctx;
         CGContextRef context = canvas->gc->context;
 
+        // Convert from UI coordinates (top-left) to Core Graphics coordinates (bottom-left)
+        double cgY1 = canvas->gc->height - y1;
+        double cgY2 = canvas->gc->height - y2;
+
         CGContextSetRGBStrokeColor(context, r, g, b, a);
         CGContextSetLineWidth(context, strokeWidth);
 
         CGContextBeginPath(context);
-        CGContextMoveToPoint(context, x1, y1);
-        CGContextAddLineToPoint(context, x2, y2);
+        CGContextMoveToPoint(context, x1, cgY1);
+        CGContextAddLineToPoint(context, x2, cgY2);
         CGContextStrokePath(context);
     }
 }
@@ -221,20 +228,22 @@ void drawText(void* ctx, const char* text, double x, double y,
             NSForegroundColorAttributeName: textColor
         };
 
-        // We need to flip the coordinate system for text rendering
-        CGContextSaveGState(context);
-
-        // Calculate text size to position it correctly
+        // Calculate text size and convert coordinates
         NSSize textSize = [string sizeWithAttributes:attributes];
 
-        // Flip coordinate system for text
-        CGContextTranslateCTM(context, x, canvas->gc->height - y);
-        CGContextScaleCTM(context, 1.0, -1.0);
+        // Convert from UI coordinates (top-left) to Core Graphics coordinates (bottom-left)
+        double cgY = canvas->gc->height - y - textSize.height;
 
-        // Draw the text
-        [string drawAtPoint:NSMakePoint(0, -textSize.height) withAttributes:attributes];
+        // Use standard Core Graphics coordinate system (bottom-left origin)
+        NSGraphicsContext *nsContext = [NSGraphicsContext graphicsContextWithCGContext:context flipped:NO];
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:nsContext];
 
-        CGContextRestoreGState(context);
+        // Draw the text at the converted position
+        [string drawAtPoint:NSMakePoint(x, cgY) withAttributes:attributes];
+
+        // Restore NSGraphicsContext
+        [NSGraphicsContext restoreGraphicsState];
     }
 }
 
@@ -319,7 +328,9 @@ void clipRect(void* ctx, double x, double y, double w, double h) {
         CanvasContext *canvas = (CanvasContext*)ctx;
         CGContextRef context = canvas->gc->context;
 
-        CGRect rect = CGRectMake(x, y, w, h);
+        // Convert from UI coordinates (top-left) to Core Graphics coordinates (bottom-left)
+        double cgY = canvas->gc->height - y - h;
+        CGRect rect = CGRectMake(x, cgY, w, h);
         CGContextClipToRect(context, rect);
     }
 }

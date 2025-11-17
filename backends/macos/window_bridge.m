@@ -168,8 +168,15 @@ void runApp(void) {
         if (bitmapContext) {
             CGImageRef image = CGBitmapContextCreateImage(bitmapContext);
             if (image) {
+                // Flip the coordinate system to display the image correctly
+                CGContextSaveGState(cgContext);
+                CGContextTranslateCTM(cgContext, 0, self.bounds.size.height);
+                CGContextScaleCTM(cgContext, 1.0, -1.0);
+
                 // Draw the image
                 CGContextDrawImage(cgContext, self.bounds, image);
+
+                CGContextRestoreGState(cgContext);
                 CGImageRelease(image);
             }
             CGContextRelease(bitmapContext);

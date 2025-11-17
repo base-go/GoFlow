@@ -1,0 +1,221 @@
+package screens
+
+import (
+	"fmt"
+
+	goflow "github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/signals"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
+	"github.com/base-go/GoFlow/pkg/navigation"
+)
+
+// DataDisplayPage showcases data display widgets
+type DataDisplayPage struct {
+	goflow.BaseWidget
+	tableData *signals.SignalSlice[TableRowData]
+}
+
+type TableRowData struct {
+	ID       int
+	Name     string
+	Email    string
+	Role     string
+	Selected bool
+}
+
+func NewDataDisplayPage() *DataDisplayPage {
+	// Sample data
+	initialData := []TableRowData{
+		{ID: 1, Name: "Alice Johnson", Email: "alice@example.com", Role: "Admin", Selected: false},
+		{ID: 2, Name: "Bob Smith", Email: "bob@example.com", Role: "User", Selected: false},
+		{ID: 3, Name: "Charlie Brown", Email: "charlie@example.com", Role: "Moderator", Selected: false},
+		{ID: 4, Name: "Diana Prince", Email: "diana@example.com", Role: "Admin", Selected: false},
+		{ID: 5, Name: "Eve Williams", Email: "eve@example.com", Role: "User", Selected: false},
+	}
+
+	return &DataDisplayPage{
+		tableData: signals.NewSlice(initialData),
+	}
+}
+
+func (p *DataDisplayPage) Build(context goflow.BuildContext) goflow.Widget {
+	// Page header
+	title := widgets.NewText("Data Display Widgets")
+	backBtn := p.buildBackButton()
+	header := widgets.NewRow(backBtn, p.spacer(20), title)
+
+	content := widgets.NewColumn(
+		header,
+		p.spacer(30),
+		p.buildDataTableSection(),
+		p.spacer(30),
+		p.buildCardsSection(),
+		p.spacer(30),
+		p.buildChipsSection(),
+		p.spacer(30),
+		p.buildBadgesSection(),
+	)
+
+	container := widgets.NewContainer()
+	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Child = content
+
+	return container
+}
+
+func (p *DataDisplayPage) buildDataTableSection() goflow.Widget {
+	sectionTitle := widgets.NewText("Data Table")
+
+	// Define columns
+	columns := []widgets.DataColumn{
+		{Label: widgets.NewText("ID"), Numeric: true},
+		{Label: widgets.NewText("Name"), Numeric: false},
+		{Label: widgets.NewText("Email"), Numeric: false},
+		{Label: widgets.NewText("Role"), Numeric: false},
+	}
+
+	// Convert data to rows
+	data := p.tableData.Get()
+	var rows []widgets.DataRow
+	for _, item := range data {
+		itemCopy := item
+		rows = append(rows, widgets.DataRow{
+			Cells: []widgets.DataCell{
+				{Child: widgets.NewText(fmt.Sprintf("%d", item.ID))},
+				{Child: widgets.NewText(item.Name)},
+				{Child: widgets.NewText(item.Email)},
+				{Child: widgets.NewText(item.Role)},
+			},
+			Selected: item.Selected,
+			OnSelectChanged: func(selected bool) {
+				p.updateRowSelection(itemCopy.ID, selected)
+			},
+		})
+	}
+
+	table := widgets.NewDataTable(columns, rows)
+	table.ShowCheckboxColumn = true
+
+	return widgets.NewColumn(
+		sectionTitle,
+		p.spacer(15),
+		table,
+	)
+}
+
+func (p *DataDisplayPage) updateRowSelection(id int, selected bool) {
+	p.tableData.Update(func(list []TableRowData) []TableRowData {
+		newList := make([]TableRowData, len(list))
+		copy(newList, list)
+		for i, item := range newList {
+			if item.ID == id {
+				newList[i].Selected = selected
+				break
+			}
+		}
+		return newList
+	})
+	fmt.Printf("Row %d selected: %v\n", id, selected)
+}
+
+func (p *DataDisplayPage) buildCardsSection() goflow.Widget {
+	sectionTitle := widgets.NewText("Cards")
+
+	card1 := p.buildCard("Card Title 1", "This is the content of the first card with some descriptive text.", goflow.NewColor(220, 230, 255, 255))
+	card2 := p.buildCard("Card Title 2", "Another card with different content to showcase variety.", goflow.NewColor(255, 230, 220, 255))
+	card3 := p.buildCard("Card Title 3", "Third card demonstrating the card widget layout.", goflow.NewColor(230, 255, 220, 255))
+
+	cardRow := widgets.NewRow(card1, p.spacer(15), card2, p.spacer(15), card3)
+
+	return widgets.NewColumn(
+		sectionTitle,
+		p.spacer(15),
+		cardRow,
+	)
+}
+
+func (p *DataDisplayPage) buildCard(title, content string, color *goflow.Color) goflow.Widget {
+	titleWidget := widgets.NewText(title)
+	contentWidget := widgets.NewText(content)
+
+	cardContent := widgets.NewColumn(
+		titleWidget,
+		p.spacer(10),
+		contentWidget,
+	)
+
+	card := widgets.NewContainer()
+	card.Padding = goflow.EdgeInsetsAll(16.0)
+	card.Color = color
+	width := 200.0
+	card.Width = &width
+	card.Child = cardContent
+
+	return card
+}
+
+func (p *DataDisplayPage) buildChipsSection() goflow.Widget {
+	sectionTitle := widgets.NewText("Chips")
+
+	chip1 := p.buildChip("Technology", goflow.NewColor(100, 150, 255, 255))
+	chip2 := p.buildChip("Design", goflow.NewColor(255, 150, 100, 255))
+	chip3 := p.buildChip("Development", goflow.NewColor(150, 200, 100, 255))
+	chip4 := p.buildChip("Testing", goflow.NewColor(200, 100, 255, 255))
+
+	chipRow := widgets.NewRow(chip1, p.spacer(10), chip2, p.spacer(10), chip3, p.spacer(10), chip4)
+
+	return widgets.NewColumn(
+		sectionTitle,
+		p.spacer(15),
+		chipRow,
+	)
+}
+
+func (p *DataDisplayPage) buildChip(label string, color *goflow.Color) goflow.Widget {
+	return widgets.NewChip(label, nil, color)
+}
+
+func (p *DataDisplayPage) buildBadgesSection() goflow.Widget {
+	sectionTitle := widgets.NewText("Badges")
+
+	badge1 := p.buildBadge("New", goflow.NewColor(255, 100, 100, 255))
+	badge2 := p.buildBadge("5", goflow.NewColor(100, 200, 100, 255))
+	badge3 := p.buildBadge("!", goflow.NewColor(255, 200, 100, 255))
+
+	badgeRow := widgets.NewRow(badge1, p.spacer(15), badge2, p.spacer(15), badge3)
+
+	return widgets.NewColumn(
+		sectionTitle,
+		p.spacer(15),
+		badgeRow,
+	)
+}
+
+func (p *DataDisplayPage) buildBadge(text string, color *goflow.Color) goflow.Widget {
+	return widgets.NewBadge(widgets.NewText(text), color)
+}
+
+func (p *DataDisplayPage) buildBackButton() goflow.Widget {
+	text := widgets.NewText("← Back")
+
+	btn := widgets.NewContainer()
+	btn.Padding = goflow.EdgeInsetsSymmetric(8.0, 16.0)
+	btn.Color = goflow.NewColor(200, 200, 200, 255)
+	btn.Child = text
+
+	return widgets.NewGestureDetector(btn, widgets.GestureCallbacks{
+		OnTap: func() {
+			navigation.Get.Back()
+		},
+	})
+}
+
+func (p *DataDisplayPage) spacer(height float64) goflow.Widget {
+	container := widgets.NewContainer()
+	container.Height = &height
+	return container
+}
+
+func (p *DataDisplayPage) CreateElement() goflow.Element {
+	return goflow.NewGenericElement(p)
+}

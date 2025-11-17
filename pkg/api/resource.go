@@ -24,7 +24,7 @@ type Resource[T any] struct {
 // NewResource creates a new Resource
 func NewResource[T any]() *Resource[T] {
 	return &Resource[T]{
-		state: signals.NewSignal(ResourceState[T]{
+		state: signals.New(ResourceState[T]{
 			Loading: false,
 		}),
 	}
@@ -33,7 +33,7 @@ func NewResource[T any]() *Resource[T] {
 // NewLoadingResource creates a new Resource in loading state
 func NewLoadingResource[T any]() *Resource[T] {
 	return &Resource[T]{
-		state: signals.NewSignal(ResourceState[T]{
+		state: signals.New(ResourceState[T]{
 			Loading: true,
 		}),
 	}
@@ -143,7 +143,7 @@ type ResourceList[T any] struct {
 // NewResourceList creates a new ResourceList
 func NewResourceList[T any]() *ResourceList[T] {
 	return &ResourceList[T]{
-		state: signals.NewSignal(ResourceState[[]T]{
+		state: signals.New(ResourceState[[]T]{
 			Loading: false,
 		}),
 	}

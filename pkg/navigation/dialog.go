@@ -45,13 +45,9 @@ func (d *DialogWrapper) Build(context goflow.BuildContext) goflow.Widget {
 	dialogContent := widgets.NewCenter(d.child)
 
 	// Stack barrier and dialog
-	return widgets.NewStack(barrier, dialogContent)
+	return widgets.NewStack([]goflow.Widget{barrier, dialogContent})
 }
 
-// CreateElement creates the element
-func (d *DialogWrapper) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(d)
-}
 
 // AlertDialog is a Material Design alert dialog
 type AlertDialog struct {
@@ -85,7 +81,7 @@ func (a *AlertDialog) Build(context goflow.BuildContext) goflow.Widget {
 	// Add title if present
 	if a.Title != nil {
 		titleContainer := widgets.NewContainer()
-		titleContainer.Padding = goflow.EdgeInsetsAll(16.0)
+		titleContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 		titleContainer.Child = a.Title
 		children = append(children, titleContainer)
 	}
@@ -93,7 +89,7 @@ func (a *AlertDialog) Build(context goflow.BuildContext) goflow.Widget {
 	// Add content if present
 	if a.Content != nil {
 		contentContainer := widgets.NewContainer()
-		contentContainer.Padding = goflow.EdgeInsetsAll(16.0)
+		contentContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 		contentContainer.Child = a.Content
 		children = append(children, contentContainer)
 	}
@@ -108,9 +104,9 @@ func (a *AlertDialog) Build(context goflow.BuildContext) goflow.Widget {
 			actionButtons = append(actionButtons, button)
 		}
 
-		actionsRow := widgets.NewRow(actionButtons...)
+		actionsRow := widgets.NewRow(actionButtons)
 		actionsContainer := widgets.NewContainer()
-		actionsContainer.Padding = goflow.EdgeInsetsAll(8.0)
+		actionsContainer.Padding = goflow.NewEdgeInsetsAll(8.0)
 		actionsContainer.Child = actionsRow
 
 		children = append(children, actionsContainer)
@@ -120,16 +116,12 @@ func (a *AlertDialog) Build(context goflow.BuildContext) goflow.Widget {
 	dialog := widgets.NewContainer()
 	dialog.Width = floatPtr(300.0)
 	dialog.Color = &goflow.Color{R: 255, G: 255, B: 255, A: 1.0} // White background
-	dialog.Padding = goflow.EdgeInsetsAll(0)
-	dialog.Child = widgets.NewColumn(children...)
+	dialog.Padding = goflow.NewEdgeInsetsAll(0)
+	dialog.Child = widgets.NewColumn(children)
 
 	return dialog
 }
 
-// CreateElement creates the element
-func (a *AlertDialog) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(a)
-}
 
 // ShowDialog is a helper function to show a dialog
 func ShowDialog(dialog goflow.Widget, barrierDismissible ...bool) {

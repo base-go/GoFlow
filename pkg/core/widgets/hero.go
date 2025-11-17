@@ -153,19 +153,19 @@ func (p *PageRouteBuilder) Build(context goflow.BuildContext) goflow.Widget {
 // BuildTransition builds the transition widget
 func (p *PageRouteBuilder) BuildTransition(
 	context goflow.BuildContext,
-	animation animation.Animation,
+	anim animation.Animation,
 	secondaryAnimation animation.Animation,
 	child goflow.Widget,
 ) goflow.Widget {
 	switch p.transition.Type {
 	case PageTransitionFade:
-		return NewFadeTransition(animation, child)
+		return NewFadeTransition(anim, child)
 
 	case PageTransitionSlideRight:
 		offsetTween := animation.NewTween(-1.0, 0.0)
 		return &SlideTransition{
 			Position: &tweenAnimation{
-				parent: animation,
+				parent: anim,
 				tween:  offsetTween,
 			},
 			Child: child,
@@ -175,7 +175,7 @@ func (p *PageRouteBuilder) BuildTransition(
 		offsetTween := animation.NewTween(1.0, 0.0)
 		return &SlideTransition{
 			Position: &tweenAnimation{
-				parent: animation,
+				parent: anim,
 				tween:  offsetTween,
 			},
 			Child: child,
@@ -184,7 +184,7 @@ func (p *PageRouteBuilder) BuildTransition(
 	case PageTransitionSlideUp:
 		return &SlideTransition{
 			Position: &tweenAnimation{
-				parent: animation,
+				parent: anim,
 				tween:  animation.NewTween(1.0, 0.0),
 			},
 			Child: child,
@@ -193,7 +193,7 @@ func (p *PageRouteBuilder) BuildTransition(
 	case PageTransitionSlideDown:
 		return &SlideTransition{
 			Position: &tweenAnimation{
-				parent: animation,
+				parent: anim,
 				tween:  animation.NewTween(-1.0, 0.0),
 			},
 			Child: child,
@@ -201,26 +201,26 @@ func (p *PageRouteBuilder) BuildTransition(
 
 	case PageTransitionZoom:
 		return NewScaleTransition(&tweenAnimation{
-			parent: animation,
+			parent: anim,
 			tween:  animation.NewTween(0.0, 1.0),
 		}, child)
 
 	case PageTransitionScale:
 		return NewScaleTransition(&tweenAnimation{
-			parent: animation,
+			parent: anim,
 			tween:  animation.NewTween(0.8, 1.0),
 		}, child)
 
 	case PageTransitionRotation:
 		return NewRotationTransition(&tweenAnimation{
-			parent: animation,
+			parent: anim,
 			tween:  animation.NewTween(0.0, 1.0),
 		}, child)
 
 	case PageTransitionMaterial:
 		// Material Design transition (fade + scale)
-		return NewFadeTransition(animation, NewScaleTransition(&tweenAnimation{
-			parent: animation,
+		return NewFadeTransition(anim, NewScaleTransition(&tweenAnimation{
+			parent: anim,
 			tween:  animation.NewTween(0.8, 1.0),
 		}, child))
 
@@ -229,14 +229,14 @@ func (p *PageRouteBuilder) BuildTransition(
 		offsetTween := animation.NewTween(-1.0, 0.0)
 		return &SlideTransition{
 			Position: &tweenAnimation{
-				parent: animation,
+				parent: anim,
 				tween:  offsetTween,
 			},
 			Child: child,
 		}
 
 	default:
-		return NewFadeTransition(animation, child)
+		return NewFadeTransition(anim, child)
 	}
 }
 

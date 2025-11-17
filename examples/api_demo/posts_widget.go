@@ -24,10 +24,12 @@ type PostsPage struct {
 func (p *PostsPage) Build(ctx goflow.BuildContext) goflow.Widget {
 	// Initialize on first build
 	if p.initialized == nil {
-		p.initialized = signals.NewSignal(false)
-		p.selectedPostID = signals.NewSignal(-1)
-		p.commentsVisible = signals.NewSignal(false)
+		p.initialized = signals.New(false)
+		p.selectedPostID = signals.New(-1)
+		p.commentsVisible = signals.New(false)
 		p.loadPosts(ctx)
+	} else {
+		p.initialized.Set(true)
 	}
 
 	state := p.postsResource.Get()
@@ -35,13 +37,13 @@ func (p *PostsPage) Build(ctx goflow.BuildContext) goflow.Widget {
 	// Show loading state
 	if state.Loading {
 		return &widgets.Center{
-			Child: &widgets.Text{
-				Text: "Loading posts...",
-				Style: &widgets.TextStyle{
-					FontSize: goflow.Float64(18),
+			Child: widgets.NewTextWithStyle(
+				"Loading posts...",
+				&goflow.TextStyle{
+					FontSize: 18,
 					Color:    goflow.NewColor(100, 100, 100, 255),
 				},
-			},
+			),
 		}
 	}
 
@@ -49,23 +51,23 @@ func (p *PostsPage) Build(ctx goflow.BuildContext) goflow.Widget {
 	if state.Error != nil {
 		return &widgets.Center{
 			Child: &widgets.Column{
-				MainAxisAlignment: widgets.MainAxisAlignmentCenter,
+				MainAxisAlign: widgets.MainAxisCenter,
 				Children: []goflow.Widget{
-					&widgets.Text{
-						Text: "Error loading posts",
-						Style: &widgets.TextStyle{
-							FontSize: goflow.Float64(18),
+					widgets.NewTextWithStyle(
+						"Error loading posts",
+						&goflow.TextStyle{
+							FontSize: 18,
 							Color:    goflow.NewColor(200, 50, 50, 255),
 						},
-					},
-					&widgets.SizedBox{Height: goflow.Float64(10)},
-					&widgets.Text{
-						Text: state.Error.Error(),
-						Style: &widgets.TextStyle{
-							FontSize: goflow.Float64(12),
+					),
+					&widgets.SizedBox{Height: floatPtr(10)},
+					widgets.NewTextWithStyle(
+						state.Error.Error(),
+						&goflow.TextStyle{
+							FontSize: 12,
 							Color:    goflow.NewColor(150, 50, 50, 255),
 						},
-					},
+					),
 				},
 			},
 		}
@@ -75,26 +77,26 @@ func (p *PostsPage) Build(ctx goflow.BuildContext) goflow.Widget {
 	posts := state.Data
 	if posts == nil || len(*posts) == 0 {
 		return &widgets.Center{
-			Child: &widgets.Text{
-				Text: "No posts found",
-				Style: &widgets.TextStyle{
-					FontSize: goflow.Float64(18),
+			Child: widgets.NewTextWithStyle(
+				"No posts found",
+				&goflow.TextStyle{
+					FontSize: 18,
 					Color:    goflow.NewColor(100, 100, 100, 255),
 				},
-			},
+			),
 		}
 	}
 
 	postWidgets := []goflow.Widget{
-		&widgets.Text{
-			Text: fmt.Sprintf("Posts by User %d", p.UserID),
-			Style: &widgets.TextStyle{
-				FontSize:   goflow.Float64(24),
-				FontWeight: widgets.FontWeightBold,
+		widgets.NewTextWithStyle(
+			fmt.Sprintf("Posts by User %d", p.UserID),
+			&goflow.TextStyle{
+				FontSize:   24,
+				FontWeight: goflow.FontWeightBold,
 				Color:      goflow.NewColor(0, 0, 0, 255),
 			},
-		},
-		&widgets.SizedBox{Height: goflow.Float64(20)},
+		),
+		&widgets.SizedBox{Height: floatPtr(20)},
 	}
 
 	selectedID := p.selectedPostID.Get()
@@ -122,15 +124,15 @@ func (p *PostsPage) Build(ctx goflow.BuildContext) goflow.Widget {
 			})
 		}
 
-		postWidgets = append(postWidgets, &widgets.SizedBox{Height: goflow.Float64(10)})
+		postWidgets = append(postWidgets, &widgets.SizedBox{Height: floatPtr(10)})
 	}
 
 	return &widgets.Padding{
 		Padding: goflow.NewEdgeInsets(20, 20, 20, 20),
 		Child: &widgets.SingleChildScrollView{
 			Child: &widgets.Column{
-				CrossAxisAlignment: widgets.CrossAxisAlignmentStart,
-				Children:           postWidgets,
+				CrossAxisAlign: widgets.CrossAxisStart,
+				Children:       postWidgets,
 			},
 		},
 	}
@@ -167,24 +169,24 @@ func (p *PostCard) Build(ctx goflow.BuildContext) goflow.Widget {
 			Padding: goflow.NewEdgeInsets(15, 15, 15, 15),
 			Color:   bgColor,
 			Child: &widgets.Column{
-				CrossAxisAlignment: widgets.CrossAxisAlignmentStart,
+				CrossAxisAlign: widgets.CrossAxisStart,
 				Children: []goflow.Widget{
-					&widgets.Text{
-						Text: p.Post.Title,
-						Style: &widgets.TextStyle{
-							FontSize:   goflow.Float64(16),
-							FontWeight: widgets.FontWeightBold,
+					widgets.NewTextWithStyle(
+						p.Post.Title,
+						&goflow.TextStyle{
+							FontSize:   16,
+							FontWeight: goflow.FontWeightBold,
 							Color:      goflow.NewColor(0, 0, 0, 255),
 						},
-					},
-					&widgets.SizedBox{Height: goflow.Float64(8)},
-					&widgets.Text{
-						Text: p.Post.Body,
-						Style: &widgets.TextStyle{
-							FontSize: goflow.Float64(14),
+					),
+					&widgets.SizedBox{Height: floatPtr(8)},
+					widgets.NewTextWithStyle(
+						p.Post.Body,
+						&goflow.TextStyle{
+							FontSize: 14,
 							Color:    goflow.NewColor(60, 60, 60, 255),
 						},
-					},
+					),
 				},
 			},
 		},
@@ -194,15 +196,15 @@ func (p *PostCard) Build(ctx goflow.BuildContext) goflow.Widget {
 // CommentsWidget displays comments for a post
 type CommentsWidget struct {
 	goflow.BaseWidget
-	PostID            int
-	commentsResource  *api.ResourceList[services.Comment]
-	initialized       *signals.Signal[bool]
+	PostID           int
+	commentsResource *api.ResourceList[services.Comment]
+	initialized      *signals.Signal[bool]
 }
 
 func (c *CommentsWidget) Build(ctx goflow.BuildContext) goflow.Widget {
 	// Initialize on first build
 	if c.initialized == nil {
-		c.initialized = signals.NewSignal(false)
+		c.initialized = signals.New(false)
 		c.loadComments(ctx)
 	}
 
@@ -212,13 +214,13 @@ func (c *CommentsWidget) Build(ctx goflow.BuildContext) goflow.Widget {
 	if state.Loading {
 		return &widgets.Padding{
 			Padding: goflow.NewEdgeInsets(15, 15, 15, 15),
-			Child: &widgets.Text{
-				Text: "Loading comments...",
-				Style: &widgets.TextStyle{
-					FontSize: goflow.Float64(14),
+			Child: widgets.NewTextWithStyle(
+				"Loading comments...",
+				&goflow.TextStyle{
+					FontSize: 14,
 					Color:    goflow.NewColor(100, 100, 100, 255),
 				},
-			},
+			),
 		}
 	}
 
@@ -226,13 +228,13 @@ func (c *CommentsWidget) Build(ctx goflow.BuildContext) goflow.Widget {
 	if state.Error != nil {
 		return &widgets.Padding{
 			Padding: goflow.NewEdgeInsets(15, 15, 15, 15),
-			Child: &widgets.Text{
-				Text: fmt.Sprintf("Error: %v", state.Error),
-				Style: &widgets.TextStyle{
-					FontSize: goflow.Float64(14),
+			Child: widgets.NewTextWithStyle(
+				fmt.Sprintf("Error: %v", state.Error),
+				&goflow.TextStyle{
+					FontSize: 14,
 					Color:    goflow.NewColor(200, 50, 50, 255),
 				},
-			},
+			),
 		}
 	}
 
@@ -241,39 +243,39 @@ func (c *CommentsWidget) Build(ctx goflow.BuildContext) goflow.Widget {
 	if comments == nil || len(*comments) == 0 {
 		return &widgets.Padding{
 			Padding: goflow.NewEdgeInsets(15, 15, 15, 15),
-			Child: &widgets.Text{
-				Text: "No comments",
-				Style: &widgets.TextStyle{
-					FontSize: goflow.Float64(14),
+			Child: widgets.NewTextWithStyle(
+				"No comments",
+				&goflow.TextStyle{
+					FontSize: 14,
 					Color:    goflow.NewColor(100, 100, 100, 255),
 				},
-			},
+			),
 		}
 	}
 
 	commentWidgets := []goflow.Widget{
-		&widgets.Text{
-			Text: "Comments:",
-			Style: &widgets.TextStyle{
-				FontSize:   goflow.Float64(14),
-				FontWeight: widgets.FontWeightBold,
+		widgets.NewTextWithStyle(
+			"Comments:",
+			&goflow.TextStyle{
+				FontSize:   14,
+				FontWeight: goflow.FontWeightBold,
 				Color:      goflow.NewColor(50, 50, 50, 255),
 			},
-		},
-		&widgets.SizedBox{Height: goflow.Float64(10)},
+		),
+		&widgets.SizedBox{Height: floatPtr(10)},
 	}
 
 	for _, comment := range *comments {
 		commentWidgets = append(commentWidgets, &CommentCard{Comment: comment})
-		commentWidgets = append(commentWidgets, &widgets.SizedBox{Height: goflow.Float64(8)})
+		commentWidgets = append(commentWidgets, &widgets.SizedBox{Height: floatPtr(8)})
 	}
 
 	return &widgets.Container{
 		Padding: goflow.NewEdgeInsets(15, 15, 15, 15),
 		Color:   goflow.NewColor(255, 255, 255, 255),
 		Child: &widgets.Column{
-			CrossAxisAlignment: widgets.CrossAxisAlignmentStart,
-			Children:           commentWidgets,
+			CrossAxisAlign: widgets.CrossAxisStart,
+			Children:       commentWidgets,
 		},
 	}
 }
@@ -300,24 +302,24 @@ func (c *CommentCard) Build(ctx goflow.BuildContext) goflow.Widget {
 		Padding: goflow.NewEdgeInsets(10, 10, 10, 10),
 		Color:   goflow.NewColor(250, 250, 250, 255),
 		Child: &widgets.Column{
-			CrossAxisAlignment: widgets.CrossAxisAlignmentStart,
+			CrossAxisAlign: widgets.CrossAxisStart,
 			Children: []goflow.Widget{
-				&widgets.Text{
-					Text: fmt.Sprintf("%s (%s)", c.Comment.Name, c.Comment.Email),
-					Style: &widgets.TextStyle{
-						FontSize:   goflow.Float64(12),
-						FontWeight: widgets.FontWeightBold,
+				widgets.NewTextWithStyle(
+					fmt.Sprintf("%s (%s)", c.Comment.Name, c.Comment.Email),
+					&goflow.TextStyle{
+						FontSize:   12,
+						FontWeight: goflow.FontWeightBold,
 						Color:      goflow.NewColor(50, 100, 200, 255),
 					},
-				},
-				&widgets.SizedBox{Height: goflow.Float64(5)},
-				&widgets.Text{
-					Text: c.Comment.Body,
-					Style: &widgets.TextStyle{
-						FontSize: goflow.Float64(12),
+				),
+				&widgets.SizedBox{Height: floatPtr(5)},
+				widgets.NewTextWithStyle(
+					c.Comment.Body,
+					&goflow.TextStyle{
+						FontSize: 12,
 						Color:    goflow.NewColor(60, 60, 60, 255),
 					},
-				},
+				),
 			},
 		},
 	}

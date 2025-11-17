@@ -1,0 +1,354 @@
+package screens
+
+import (
+	"fmt"
+	"regexp"
+
+	goflow "github.com/base-go/GoFlow/pkg/core/framework"
+	"github.com/base-go/GoFlow/pkg/core/signals"
+	"github.com/base-go/GoFlow/pkg/core/widgets"
+	"github.com/base-go/GoFlow/pkg/navigation"
+)
+
+// FormValidationPage demonstrates form widgets and validation
+type FormValidationPage struct {
+	goflow.BaseWidget
+	formState      *widgets.FormState
+	name           *signals.Signal[string]
+	email          *signals.Signal[string]
+	password       *signals.Signal[string]
+	agreeToTerms   *signals.Signal[bool]
+	selectedOption *signals.Signal[string]
+	ageValue       *signals.Signal[float64]
+}
+
+func NewFormValidationPage() *FormValidationPage {
+	return &FormValidationPage{
+		formState:      widgets.NewFormState(),
+		name:           signals.New(""),
+		email:          signals.New(""),
+		password:       signals.New(""),
+		agreeToTerms:   signals.New(false),
+		selectedOption: signals.New("option1"),
+		ageValue:       signals.New(25.0),
+	}
+}
+
+func (p *FormValidationPage) Build(context goflow.BuildContext) goflow.Widget {
+	// Page header
+	title := widgets.NewText("Form Validation")
+	backBtn := p.buildBackButton()
+	header := widgets.NewRow(backBtn, p.spacer(20), title)
+
+	// Form sections
+	content := widgets.NewColumn(
+		header,
+		p.spacer(30),
+		p.buildTextFieldsSection(),
+		p.spacer(30),
+		p.buildDropdownSection(),
+		p.spacer(30),
+		p.buildCheckboxSection(),
+		p.spacer(30),
+		p.buildRadioSection(),
+		p.spacer(30),
+		p.buildSliderSection(),
+		p.spacer(30),
+		p.buildSubmitSection(),
+	)
+
+	container := widgets.NewContainer()
+	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Child = content
+
+	return container
+}
+
+func (p *FormValidationPage) buildTextFieldsSection() goflow.Widget {
+	nameField := p.buildTextField("Name", "Enter your name", p.name, p.validateName)
+	emailField := p.buildTextField("Email", "Enter your email", p.email, p.validateEmail)
+	passwordField := p.buildTextField("Password", "Enter password (min 8 chars)", p.password, p.validatePassword)
+
+	return widgets.NewColumn(
+		widgets.NewText("Text Input Fields"),
+		p.spacer(15),
+		nameField,
+		p.spacer(15),
+		emailField,
+		p.spacer(15),
+		passwordField,
+	)
+}
+
+func (p *FormValidationPage) buildTextField(
+	label string,
+	hint string,
+	signal *signals.Signal[string],
+	validator func(string) *string,
+) goflow.Widget {
+	value := signal.Get()
+	errorMsg := validator(value)
+
+	labelWidget := widgets.NewText(label)
+
+	textField := widgets.NewTextFormField()
+	textField.InitialValue = value
+	textField.Hint = hint
+	textField.OnChanged = func(v string) {
+		signal.Set(v)
+	}
+	textField.Validator = func(v string) *string {
+		return validator(v)
+	}
+
+	var errorWidget goflow.Widget
+	if errorMsg != nil && value != "" {
+		errorText := widgets.NewText(*errorMsg)
+		errorContainer := widgets.NewContainer()
+		errorContainer.Padding = goflow.EdgeInsetsSymmetric(5.0, 0)
+		errorContainer.Color = goflow.NewColor(255, 100, 100, 100)
+		errorContainer.Child = errorText
+		errorWidget = errorContainer
+	} else {
+		errorWidget = p.spacer(0)
+	}
+
+	return widgets.NewColumn(
+		labelWidget,
+		p.spacer(8),
+		textField,
+		p.spacer(5),
+		errorWidget,
+	)
+}
+
+func (p *FormValidationPage) validateName(value string) *string {
+	if value == "" {
+		msg := "Name is required"
+		return &msg
+	}
+	if len(value) < 2 {
+		msg := "Name must be at least 2 characters"
+		return &msg
+	}
+	return nil
+}
+
+func (p *FormValidationPage) validateEmail(value string) *string {
+	if value == "" {
+		msg := "Email is required"
+		return &msg
+	}
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(value) {
+		msg := "Invalid email format"
+		return &msg
+	}
+	return nil
+}
+
+func (p *FormValidationPage) validatePassword(value string) *string {
+	if value == "" {
+		msg := "Password is required"
+		return &msg
+	}
+	if len(value) < 8 {
+		msg := "Password must be at least 8 characters"
+		return &msg
+	}
+	return nil
+}
+
+func (p *FormValidationPage) buildDropdownSection() goflow.Widget {
+	items := []widgets.DropdownMenuItem{
+		{Value: "option1", Child: widgets.NewText("Option 1")},
+		{Value: "option2", Child: widgets.NewText("Option 2")},
+		{Value: "option3", Child: widgets.NewText("Option 3")},
+	}
+
+	dropdown := widgets.NewDropdownFormField(items)
+	dropdown.Value = p.selectedOption.Get()
+	dropdown.OnChanged = func(value interface{}) {
+		if strVal, ok := value.(string); ok {
+			p.selectedOption.Set(strVal)
+		}
+	}
+	dropdown.Hint = "Select an option"
+
+	label := widgets.NewText("Dropdown Selection")
+
+	return widgets.NewColumn(
+		label,
+		p.spacer(8),
+		dropdown,
+	)
+}
+
+func (p *FormValidationPage) buildCheckboxSection() goflow.Widget {
+	checked := p.agreeToTerms.Get()
+
+	title := widgets.NewText("I agree to the terms and conditions")
+	checkboxField := widgets.NewCheckboxFormField(title)
+	checkboxField.Value = checked
+	checkboxField.OnChanged = func(value bool) {
+		p.agreeToTerms.Set(value)
+	}
+
+	return widgets.NewColumn(
+		widgets.NewText("Agreement"),
+		p.spacer(10),
+		checkboxField,
+	)
+}
+
+func (p *FormValidationPage) buildRadioSection() goflow.Widget {
+	currentValue := p.selectedOption.Get()
+
+	options := []struct {
+		value string
+		label string
+	}{
+		{"radio1", "Radio Option 1"},
+		{"radio2", "Radio Option 2"},
+		{"radio3", "Radio Option 3"},
+	}
+
+	var radioFields []goflow.Widget
+	for _, opt := range options {
+		optValue := opt.value
+		title := widgets.NewText(opt.label)
+		radioField := widgets.NewRadioFormField(optValue, currentValue, title)
+		radioField.OnChanged = func(value interface{}) {
+			if strVal, ok := value.(string); ok {
+				p.selectedOption.Set(strVal)
+			}
+		}
+		radioFields = append(radioFields, radioField, p.spacer(8))
+	}
+
+	return widgets.NewColumn(
+		append([]goflow.Widget{widgets.NewText("Radio Group"), p.spacer(10)}, radioFields...)...,
+	)
+}
+
+func (p *FormValidationPage) buildSliderSection() goflow.Widget {
+	value := p.ageValue.Get()
+
+	sliderField := widgets.NewSliderFormField(18.0, 100.0)
+	sliderField.Value = value
+	sliderField.OnChanged = func(v float64) {
+		p.ageValue.Set(v)
+	}
+	sliderField.Label = "Age"
+
+	valueLabel := widgets.NewText(fmt.Sprintf("Age: %.0f years", value))
+
+	return widgets.NewColumn(
+		widgets.NewText("Slider Field"),
+		p.spacer(10),
+		valueLabel,
+		p.spacer(10),
+		sliderField,
+	)
+}
+
+func (p *FormValidationPage) buildSubmitSection() goflow.Widget {
+	submitBtn := p.buildButton("Submit Form", func() {
+		if p.validateForm() {
+			navigation.ShowSnackbar("Form is valid! ✓", 2000)
+			fmt.Println("Form submitted successfully!")
+			p.printFormData()
+		} else {
+			navigation.ShowSnackbar("Please fix validation errors", 3000)
+		}
+	})
+
+	resetBtn := p.buildButton("Reset Form", func() {
+		p.resetForm()
+		navigation.ShowSnackbar("Form reset", 2000)
+	})
+
+	return widgets.NewRow(
+		submitBtn,
+		p.spacer(15),
+		resetBtn,
+	)
+}
+
+func (p *FormValidationPage) validateForm() bool {
+	valid := true
+
+	if p.validateName(p.name.Get()) != nil {
+		valid = false
+	}
+	if p.validateEmail(p.email.Get()) != nil {
+		valid = false
+	}
+	if p.validatePassword(p.password.Get()) != nil {
+		valid = false
+	}
+	if !p.agreeToTerms.Get() {
+		valid = false
+		fmt.Println("Must agree to terms")
+	}
+
+	return valid
+}
+
+func (p *FormValidationPage) resetForm() {
+	p.name.Set("")
+	p.email.Set("")
+	p.password.Set("")
+	p.agreeToTerms.Set(false)
+	p.selectedOption.Set("option1")
+	p.ageValue.Set(25.0)
+}
+
+func (p *FormValidationPage) printFormData() {
+	fmt.Println("=== Form Data ===")
+	fmt.Printf("Name: %s\n", p.name.Get())
+	fmt.Printf("Email: %s\n", p.email.Get())
+	fmt.Printf("Password: %s\n", p.password.Get())
+	fmt.Printf("Terms Accepted: %v\n", p.agreeToTerms.Get())
+	fmt.Printf("Selected Option: %s\n", p.selectedOption.Get())
+	fmt.Printf("Age: %.0f\n", p.ageValue.Get())
+	fmt.Println("================")
+}
+
+func (p *FormValidationPage) buildButton(label string, onPress func()) goflow.Widget {
+	text := widgets.NewText(label)
+
+	btn := widgets.NewContainer()
+	btn.Padding = goflow.EdgeInsetsSymmetric(12.0, 24.0)
+	btn.Color = goflow.NewColor(100, 150, 255, 255)
+	btn.Child = text
+
+	return widgets.NewGestureDetector(btn, widgets.GestureCallbacks{
+		OnTap: onPress,
+	})
+}
+
+func (p *FormValidationPage) buildBackButton() goflow.Widget {
+	text := widgets.NewText("← Back")
+
+	btn := widgets.NewContainer()
+	btn.Padding = goflow.EdgeInsetsSymmetric(8.0, 16.0)
+	btn.Color = goflow.NewColor(200, 200, 200, 255)
+	btn.Child = text
+
+	return widgets.NewGestureDetector(btn, widgets.GestureCallbacks{
+		OnTap: func() {
+			navigation.Get.Back()
+		},
+	})
+}
+
+func (p *FormValidationPage) spacer(height float64) goflow.Widget {
+	container := widgets.NewContainer()
+	container.Height = &height
+	return container
+}
+
+func (p *FormValidationPage) CreateElement() goflow.Element {
+	return goflow.NewGenericElement(p)
+}

@@ -43,7 +43,7 @@ func (s *Snackbar) Build(context goflow.BuildContext) goflow.Widget {
 	// Add message text
 	messageText := widgets.NewText(s.message)
 	messageContainer := widgets.NewContainer()
-	messageContainer.Padding = goflow.EdgeInsetsAll(16.0)
+	messageContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 	messageContainer.Child = messageText
 
 	children = append(children, messageContainer)
@@ -52,7 +52,7 @@ func (s *Snackbar) Build(context goflow.BuildContext) goflow.Widget {
 	if s.action != nil {
 		actionText := widgets.NewText(s.action.Label)
 		actionContainer := widgets.NewContainer()
-		actionContainer.Padding = goflow.EdgeInsetsSymmetric(8.0, 16.0)
+		actionContainer.Padding = goflow.NewEdgeInsetsSymmetric(8.0, 16.0)
 		actionContainer.Child = actionText
 		// TODO: Add GestureDetector when available
 		// actionContainer = widgets.NewGestureDetector(actionContainer, ...)
@@ -61,7 +61,7 @@ func (s *Snackbar) Build(context goflow.BuildContext) goflow.Widget {
 	}
 
 	// Create row with message and action
-	row := widgets.NewRow(children...)
+	row := widgets.NewRow(children)
 
 	// Create snackbar container
 	container := widgets.NewContainer()
@@ -69,23 +69,15 @@ func (s *Snackbar) Build(context goflow.BuildContext) goflow.Widget {
 	container.Child = row
 
 	// Position at bottom with some margin
-	positioned := widgets.NewPositioned(container,
-		floatPtr(16.0),  // left
-		nil,             // top
-		floatPtr(16.0),  // right
-		floatPtr(16.0),  // bottom
-		nil,             // width
-		nil,             // height
-	)
+	positioned := widgets.NewPositioned(container)
+	positioned.Left = floatPtr(16.0)
+	positioned.Right = floatPtr(16.0)
+	positioned.Bottom = floatPtr(16.0)
 
 	// Wrap in stack to position correctly
-	return widgets.NewStack(positioned)
+	return widgets.NewStack([]goflow.Widget{positioned})
 }
 
-// CreateElement creates the element
-func (s *Snackbar) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(s)
-}
 
 // ShowSnackbar is a helper function to show a snackbar
 func ShowSnackbar(message string, duration ...int) {

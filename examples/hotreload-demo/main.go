@@ -33,13 +33,13 @@ func main() {
 	// Initialize state
 	state = &AppState{
 		Counter:   0,
-		Message:   "Hello, GoFlow!",
+		Message:   "GoFlow Hot Reload Demo Working! ⚡",
 		StartTime: time.Now(),
 	}
 
 	// Create hot reloader
 	reloader, err := hotreload.NewHotReloader(hotreload.Config{
-		WatchPaths: []string{"./examples/hotreload-demo"},
+		WatchPaths: []string{"."},
 		ReloadFunc: handleReload,
 		EnableStatePreservation: true,
 	})

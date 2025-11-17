@@ -91,17 +91,13 @@ func (h *HomePage) Build(context goflow.BuildContext) goflow.Widget {
 	}
 	children = append(children, buttons...)
 
-	column := widgets.NewColumn(children...)
+	column := widgets.NewColumn(children)
 
 	container := widgets.NewContainer()
-	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Padding = goflow.NewEdgeInsetsAll(20.0)
 	container.Child = column
 
 	return widgets.NewCenter(container)
-}
-
-func (h *HomePage) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(h)
 }
 
 // SecondPage - demonstrates navigation stack
@@ -135,17 +131,13 @@ func (s *SecondPage) Build(context goflow.BuildContext) goflow.Widget {
 	children := []goflow.Widget{title, subtitle, widgets.NewContainer()}
 	children = append(children, buttons...)
 
-	column := widgets.NewColumn(children...)
+	column := widgets.NewColumn(children)
 
 	container := widgets.NewContainer()
-	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Padding = goflow.NewEdgeInsetsAll(20.0)
 	container.Child = column
 
 	return widgets.NewCenter(container)
-}
-
-func (s *SecondPage) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(s)
 }
 
 // ThirdPage - demonstrates advanced navigation
@@ -182,17 +174,13 @@ func (t *ThirdPage) Build(context goflow.BuildContext) goflow.Widget {
 	children := []goflow.Widget{title, subtitle, widgets.NewContainer()}
 	children = append(children, buttons...)
 
-	column := widgets.NewColumn(children...)
+	column := widgets.NewColumn(children)
 
 	container := widgets.NewContainer()
-	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Padding = goflow.NewEdgeInsetsAll(20.0)
 	container.Child = column
 
 	return widgets.NewCenter(container)
-}
-
-func (t *ThirdPage) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(t)
 }
 
 // SettingsPage - demonstrates named routes
@@ -220,17 +208,13 @@ func (s *SettingsPage) Build(context goflow.BuildContext) goflow.Widget {
 	children := []goflow.Widget{title, subtitle, widgets.NewContainer()}
 	children = append(children, buttons...)
 
-	column := widgets.NewColumn(children...)
+	column := widgets.NewColumn(children)
 
 	container := widgets.NewContainer()
-	container.Padding = goflow.EdgeInsetsAll(20.0)
+	container.Padding = goflow.NewEdgeInsetsAll(20.0)
 	container.Child = column
 
 	return widgets.NewCenter(container)
-}
-
-func (s *SettingsPage) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(s)
 }
 
 // Helper functions
@@ -240,7 +224,7 @@ func createButton(label string, onPress func()) goflow.Widget {
 
 	button := widgets.NewContainer()
 	button.Color = &goflow.Color{R: 100, G: 150, B: 255, A: 1.0}
-	button.Padding = goflow.EdgeInsetsSymmetric(12.0, 20.0)
+	button.Padding = goflow.NewEdgeInsetsSymmetric(12.0, 20.0)
 	button.Child = text
 
 	// TODO: Add GestureDetector when available
@@ -262,7 +246,7 @@ func showExampleDialog() {
 	dialog.Width = floatPtr(300.0)
 	dialog.Height = floatPtr(200.0)
 	dialog.Color = &goflow.Color{R: 255, G: 255, B: 255, A: 1.0}
-	dialog.Padding = goflow.EdgeInsetsAll(20.0)
+	dialog.Padding = goflow.NewEdgeInsetsAll(20.0)
 	dialog.Child = content
 
 	navigation.Get.Dialog(dialog, true)
@@ -275,7 +259,7 @@ func showExampleBottomSheet() {
 		widgets.NewText("Option 3"),
 	}
 
-	column := widgets.NewColumn(items...)
+	column := widgets.NewColumn(items)
 
 	navigation.Get.BottomSheet(column, true)
 }
@@ -299,7 +283,7 @@ func createBottomSheetContent() goflow.Widget {
 		}),
 	}
 
-	return widgets.NewColumn(options...)
+	return widgets.NewColumn(options)
 }
 
 func floatPtr(f float64) *float64 {

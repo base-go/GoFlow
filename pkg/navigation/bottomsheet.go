@@ -42,27 +42,17 @@ func (b *BottomSheetWrapper) Build(context goflow.BuildContext) goflow.Widget {
 	// Create bottom sheet container
 	sheetContainer := widgets.NewContainer()
 	sheetContainer.Color = &goflow.Color{R: 255, G: 255, B: 255, A: 1.0} // White background
-	sheetContainer.Padding = goflow.EdgeInsetsAll(16.0)
+	sheetContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 	sheetContainer.Child = b.child
 
 	// Align to bottom using Positioned widget
-	sheet := widgets.NewPositioned(sheetContainer,
-		nil,                      // left
-		nil,                      // top
-		nil,                      // right
-		floatPtr(0.0),            // bottom
-		nil,                      // width
-		nil,                      // height
-	)
+	sheet := widgets.NewPositioned(sheetContainer)
+	sheet.Bottom = floatPtr(0.0)
 
 	// Stack barrier and bottom sheet
-	return widgets.NewStack(barrier, sheet)
+	return widgets.NewStack([]goflow.Widget{barrier, sheet})
 }
 
-// CreateElement creates the element
-func (b *BottomSheetWrapper) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(b)
-}
 
 // ModalBottomSheet is a modal bottom sheet widget
 type ModalBottomSheet struct {
@@ -104,7 +94,7 @@ func (m *ModalBottomSheet) Build(context goflow.BuildContext) goflow.Widget {
 		handle.Color = &goflow.Color{R: 200, G: 200, B: 200, A: 1.0} // Light gray
 
 		handleContainer := widgets.NewContainer()
-		handleContainer.Padding = goflow.EdgeInsetsSymmetric(8.0, 0)
+		handleContainer.Padding = goflow.NewEdgeInsetsSymmetric(8.0, 0)
 		handleContainer.Child = widgets.NewCenter(handle)
 
 		children = append(children, handleContainer)
@@ -114,7 +104,7 @@ func (m *ModalBottomSheet) Build(context goflow.BuildContext) goflow.Widget {
 	if m.title != "" {
 		titleText := widgets.NewText(m.title)
 		titleContainer := widgets.NewContainer()
-		titleContainer.Padding = goflow.EdgeInsetsAll(16.0)
+		titleContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 		titleContainer.Child = titleText
 
 		children = append(children, titleContainer)
@@ -122,12 +112,12 @@ func (m *ModalBottomSheet) Build(context goflow.BuildContext) goflow.Widget {
 
 	// Add content
 	contentContainer := widgets.NewContainer()
-	contentContainer.Padding = goflow.EdgeInsetsAll(16.0)
+	contentContainer.Padding = goflow.NewEdgeInsetsAll(16.0)
 	contentContainer.Child = m.child
 	children = append(children, contentContainer)
 
 	// Create column with all children
-	column := widgets.NewColumn(children...)
+	column := widgets.NewColumn(children)
 
 	// Wrap in container with rounded top corners
 	container := widgets.NewContainer()
@@ -137,10 +127,6 @@ func (m *ModalBottomSheet) Build(context goflow.BuildContext) goflow.Widget {
 	return container
 }
 
-// CreateElement creates the element
-func (m *ModalBottomSheet) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(m)
-}
 
 // ShowBottomSheet is a helper function to show a bottom sheet
 func ShowBottomSheet(sheet goflow.Widget, isDismissible ...bool) {

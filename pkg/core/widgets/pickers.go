@@ -30,7 +30,7 @@ func ShowDatePicker(
 	onDateSelected func(*Date),
 ) {
 	// Create date picker dialog
-	picker := &DatePicker{
+	_ = &DatePicker{
 		InitialDate: initialDate,
 		FirstDate:   firstDate,
 		LastDate:    lastDate,
@@ -65,8 +65,10 @@ func (dp *DatePicker) Build(context goflow.BuildContext) goflow.Widget {
 				&Container{
 					Color: goflow.NewColor(33, 150, 243, 255),
 					Child: &Text{
-						Data:  dp.HelpText,
-						Style: goflow.NewTextStyle().WithColor(goflow.NewColor(255, 255, 255, 255)),
+						Data: dp.HelpText,
+						Style: &goflow.TextStyle{
+							Color: goflow.NewColor(255, 255, 255, 255),
+						},
 					},
 					Padding: goflow.NewEdgeInsets(16, 16, 16, 16),
 				},
@@ -74,13 +76,13 @@ func (dp *DatePicker) Build(context goflow.BuildContext) goflow.Widget {
 				dp.buildCalendar(),
 				// Actions
 				&Row{
-					MainAxisAlignment: MainAxisAlignmentEnd,
+					MainAxisAlignment: MainAxisEnd,
 					Children: []goflow.Widget{
 						&Text{
 							Data:  dp.CancelText,
 							Style: goflow.NewTextStyle(),
 						},
-						&SizedBox{Width: 8},
+						&SizedBox{Width: func() *float64 { w := 8.0; return &w }()},
 						&Text{
 							Data:  dp.ConfirmText,
 							Style: goflow.NewTextStyle(),
@@ -150,7 +152,7 @@ func ShowTimePicker(
 	onTimeSelected func(*TimeOfDay),
 ) {
 	// Create time picker dialog
-	picker := &TimePicker{
+	_ = &TimePicker{
 		InitialTime:     initialTime,
 		HelpText:        "Select Time",
 		CancelText:      "Cancel",
@@ -188,38 +190,46 @@ func (tp *TimePicker) Build(context goflow.BuildContext) goflow.Widget {
 				&Container{
 					Color: goflow.NewColor(33, 150, 243, 255),
 					Child: &Text{
-						Data:  tp.HelpText,
-						Style: goflow.NewTextStyle().WithColor(goflow.NewColor(255, 255, 255, 255)),
+						Data: tp.HelpText,
+						Style: &goflow.TextStyle{
+							Color: goflow.NewColor(255, 255, 255, 255),
+						},
 					},
 					Padding: goflow.NewEdgeInsets(16, 16, 16, 16),
 				},
 				// Time display
 				&Row{
-					MainAxisAlignment: MainAxisAlignmentCenter,
+					MainAxisAlignment: MainAxisCenter,
 					Children: []goflow.Widget{
 						&Text{
-							Data:  hourText,
-							Style: goflow.NewTextStyle().WithFontSize(48),
+							Data: hourText,
+							Style: &goflow.TextStyle{
+								FontSize: 48,
+							},
 						},
 						&Text{
-							Data:  ":",
-							Style: goflow.NewTextStyle().WithFontSize(48),
+							Data: ":",
+							Style: &goflow.TextStyle{
+								FontSize: 48,
+							},
 						},
 						&Text{
-							Data:  minuteText,
-							Style: goflow.NewTextStyle().WithFontSize(48),
+							Data: minuteText,
+							Style: &goflow.TextStyle{
+								FontSize: 48,
+							},
 						},
 					},
 				},
 				// Actions
 				&Row{
-					MainAxisAlignment: MainAxisAlignmentEnd,
+					MainAxisAlignment: MainAxisEnd,
 					Children: []goflow.Widget{
 						&Text{
 							Data:  tp.CancelText,
 							Style: goflow.NewTextStyle(),
 						},
-						&SizedBox{Width: 8},
+						&SizedBox{Width: func() *float64 { w := 8.0; return &w }()},
 						&Text{
 							Data:  tp.ConfirmText,
 							Style: goflow.NewTextStyle(),
@@ -271,7 +281,7 @@ func ShowColorPicker(
 	initialColor *goflow.Color,
 	onColorSelected func(*goflow.Color),
 ) {
-	picker := NewColorPicker(initialColor, onColorSelected)
+	_ = NewColorPicker(initialColor, onColorSelected)
 	// Show as dialog (in a real implementation, this would use the Navigator)
 	if onColorSelected != nil {
 		onColorSelected(initialColor)
@@ -363,11 +373,12 @@ func (cp *ColorPicker) buildColorPalette() goflow.Widget {
 
 func (cp *ColorPicker) buildAlphaSlider() goflow.Widget {
 	if !cp.EnableAlpha {
-		return &SizedBox{Width: 0, Height: 0}
+		zero := 0.0
+		return &SizedBox{Width: &zero, Height: &zero}
 	}
 
 	return &Slider{
-		Value: float64(cp.PickerColor.A) / 255.0,
+		Value: cp.PickerColor.A,
 		Min:   0.0,
 		Max:   1.0,
 		OnChanged: func(value float64) {
@@ -376,7 +387,7 @@ func (cp *ColorPicker) buildAlphaSlider() goflow.Widget {
 					R: cp.PickerColor.R,
 					G: cp.PickerColor.G,
 					B: cp.PickerColor.B,
-					A: uint8(value * 255),
+					A: value,
 				}
 				cp.OnColorChanged(newColor)
 			}

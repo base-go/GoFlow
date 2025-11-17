@@ -62,11 +62,6 @@ func (n *Navigator) Build(context goflow.BuildContext) goflow.Widget {
 	}
 }
 
-// CreateElement creates a StatefulElement for Navigator
-func (n *Navigator) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(n)
-}
-
 // NavigatorStack renders the stack of routes, dialogs, and overlays
 type NavigatorStack struct {
 	goflow.BaseWidget
@@ -106,13 +101,9 @@ func (ns *NavigatorStack) Build(context goflow.BuildContext) goflow.Widget {
 		return widgets.NewContainer()
 	}
 
-	return widgets.NewStack(children...)
+	return widgets.NewStack(children)
 }
 
-// CreateElement creates the element
-func (ns *NavigatorStack) CreateElement() goflow.Element {
-	return goflow.NewGenericElement(ns)
-}
 
 // GetApp wraps the app with Navigator
 func GetApp(home goflow.Widget, routes map[string]RouteBuilder) goflow.Widget {

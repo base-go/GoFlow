@@ -77,7 +77,7 @@ func (c *Checkbox) buildCheckMark() goflow.Widget {
 
 	// Return a checkmark icon
 	return &Icon{
-		Icon:  "check",
+		Icon:  IconData{Name: "check"},
 		Size:  14.0,
 		Color: c.CheckColor,
 	}
@@ -295,7 +295,7 @@ func (s *Slider) Build(context goflow.BuildContext) goflow.Widget {
 	inactiveWidth := width * (1 - percentage)
 
 	return &GestureDetector{
-		OnPanUpdate: func(details *PanDetails) {
+		OnPanUpdate: func(details DragUpdateDetails) {
 			if !s.Enabled {
 				return
 			}
@@ -321,12 +321,12 @@ func (s *Slider) Build(context goflow.BuildContext) goflow.Widget {
 				s.OnChanged(newValue)
 			}
 		},
-		OnPanStart: func(details *PanDetails) {
+		OnPanStart: func(details DragStartDetails) {
 			if s.OnChangeStart != nil {
 				s.OnChangeStart(s.Value)
 			}
 		},
-		OnPanEnd: func(details *PanDetails) {
+		OnPanEnd: func(details DragEndDetails) {
 			if s.OnChangeEnd != nil {
 				s.OnChangeEnd(s.Value)
 			}

@@ -26,7 +26,7 @@ type PageTransition struct {
 	ReverseDuration time.Duration
 	Curve           animation.Curve
 	MatchingBuilder PageTransitionsBuilder
-	Alignment       goflow.Alignment
+	Alignment       animation.Alignment
 	IsIOS           bool
 }
 
@@ -91,7 +91,7 @@ func NewPageTransition(transitionType PageTransitionType, child goflow.Widget) *
 		Duration:        300 * time.Millisecond,
 		ReverseDuration: 300 * time.Millisecond,
 		Curve:           animation.EaseInOut,
-		Alignment:       goflow.Alignment{X: 0, Y: 0},
+		Alignment:       animation.Alignment{X: 0, Y: 0},
 		IsIOS:           false,
 	}
 }
@@ -109,7 +109,7 @@ func (p *PageTransition) WithCurve(curve animation.Curve) *PageTransition {
 }
 
 // WithAlignment sets the alignment for scale/zoom transitions
-func (p *PageTransition) WithAlignment(alignment goflow.Alignment) *PageTransition {
+func (p *PageTransition) WithAlignment(alignment animation.Alignment) *PageTransition {
 	p.Alignment = alignment
 	return p
 }

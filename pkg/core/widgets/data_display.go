@@ -1,8 +1,10 @@
 package widgets
 
 import (
+	"fmt"
 	"sort"
 
+	"github.com/base-go/GoFlow/pkg/core/animation"
 	goflow "github.com/base-go/GoFlow/pkg/core/framework"
 )
 
@@ -98,7 +100,7 @@ func (dt *DataTable) buildHeaderRow() goflow.Widget {
 	for i, column := range dt.Columns {
 		isCurrent := dt.SortColumnIndex != nil && *dt.SortColumnIndex == i
 
-		cell := &Container{
+		var cell goflow.Widget = &Container{
 			Child: &Row{
 				Children: []goflow.Widget{
 					column.Label,
@@ -111,6 +113,7 @@ func (dt *DataTable) buildHeaderRow() goflow.Widget {
 		if column.OnSort != nil {
 			columnIndex := i
 			cell = &GestureDetector{
+				Child: cell,
 				OnTap: func() {
 					newAscending := true
 					if isCurrent {
@@ -120,8 +123,7 @@ func (dt *DataTable) buildHeaderRow() goflow.Widget {
 					dt.SortAscending = newAscending
 					column.OnSort(columnIndex, newAscending)
 				},
-				Child: cell,
-			}.(*GestureDetector)
+			}
 		}
 
 		cells[i] = cell
@@ -139,7 +141,8 @@ func (dt *DataTable) buildHeaderRow() goflow.Widget {
 
 func (dt *DataTable) buildSortIndicator(isCurrent bool) goflow.Widget {
 	if !isCurrent {
-		return &SizedBox{Width: 0, Height: 0}
+		zero := 0.0
+		return &SizedBox{Width: &zero, Height: &zero}
 	}
 
 	iconName := "arrow_upward"
@@ -148,7 +151,7 @@ func (dt *DataTable) buildSortIndicator(isCurrent bool) goflow.Widget {
 	}
 
 	return &Icon{
-		Icon: iconName,
+		Icon: IconData{Name: iconName},
 		Size: 16,
 	}
 }
@@ -330,7 +333,7 @@ type ExpansionTile struct {
 	OnExpansionChanged func(bool)
 	TilePadding       *goflow.EdgeInsets
 	ExpandedCrossAxisAlignment CrossAxisAlignment
-	ExpandedAlignment Alignment
+	ExpandedAlignment animation.Alignment
 	ChildrenPadding   *goflow.EdgeInsets
 	BackgroundColor   *goflow.Color
 	CollapsedBackgroundColor *goflow.Color
@@ -348,7 +351,7 @@ func NewExpansionTile(title goflow.Widget, children []goflow.Widget) *ExpansionT
 		Children:          children,
 		InitiallyExpanded: false,
 		isExpanded:        false,
-		ExpandedCrossAxisAlignment: CrossAxisAlignmentCenter,
+		ExpandedCrossAxisAlignment: CrossAxisCenter,
 	}
 }
 
@@ -361,7 +364,7 @@ func (et *ExpansionTile) Build(context goflow.BuildContext) goflow.Widget {
 	}
 
 	headerChildren = append(headerChildren, &Column{
-		CrossAxisAlignment: CrossAxisAlignmentStart,
+		CrossAxisAlign: CrossAxisStart,
 		Children: []goflow.Widget{
 			et.Title,
 			et.Subtitle,
@@ -375,7 +378,7 @@ func (et *ExpansionTile) Build(context goflow.BuildContext) goflow.Widget {
 	}
 
 	headerChildren = append(headerChildren, &Icon{
-		Icon: iconName,
+		Icon: IconData{Name: iconName},
 		Size: 24,
 	})
 
@@ -478,7 +481,7 @@ func (tv *TreeView) buildNode(node TreeNode, level int) goflow.Widget {
 	expanderIcon := tv.buildExpander(node)
 
 	children := []goflow.Widget{
-		&SizedBox{Width: indent},
+		&SizedBox{Width: &indent},
 		expanderIcon,
 	}
 
@@ -510,7 +513,8 @@ func (tv *TreeView) buildNode(node TreeNode, level int) goflow.Widget {
 
 func (tv *TreeView) buildExpander(node TreeNode) goflow.Widget {
 	if len(node.Children) == 0 {
-		return &SizedBox{Width: 16, Height: 16}
+		size := 16.0
+		return &SizedBox{Width: &size, Height: &size}
 	}
 
 	if tv.ExpanderBuilder != nil {
@@ -523,7 +527,7 @@ func (tv *TreeView) buildExpander(node TreeNode) goflow.Widget {
 	}
 
 	return &Icon{
-		Icon: iconName,
+		Icon: IconData{Name: iconName},
 		Size: 16,
 	}
 }
@@ -595,7 +599,7 @@ func (pdt *PaginatedDataTable) Build(context goflow.BuildContext) goflow.Widget 
 
 func (pdt *PaginatedDataTable) buildPagination(totalRows, startRow, endRow int) goflow.Widget {
 	return &Row{
-		MainAxisAlignment: MainAxisAlignmentEnd,
+		MainAxisAlignment: MainAxisEnd,
 		Children: []goflow.Widget{
 			&Text{
 				Data:  fmt.Sprintf("%d-%d of %d", startRow+1, endRow, totalRows),

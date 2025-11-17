@@ -4,6 +4,19 @@ import (
 	goflow "github.com/base-go/GoFlow/pkg/core/framework"
 )
 
+// Date represents a date (shared with pickers.go)
+type Date struct {
+	Year  int
+	Month int
+	Day   int
+}
+
+// TimeOfDay represents a time of day (shared with pickers.go)
+type TimeOfDay struct {
+	Hour   int
+	Minute int
+}
+
 // TextFormField is a TextField with form validation
 type TextFormField struct {
 	goflow.BaseWidget
@@ -116,11 +129,7 @@ type DropdownFormField struct {
 	fieldState   *FormFieldStateImpl
 }
 
-// DropdownMenuItem represents an item in a dropdown
-type DropdownMenuItem struct {
-	Value interface{}
-	Child goflow.Widget
-}
+// DropdownMenuItem is already defined in dropdown.go - no need to redeclare
 
 // NewDropdownFormField creates a new dropdown form field
 func NewDropdownFormField(items []DropdownMenuItem) *DropdownFormField {
@@ -145,7 +154,7 @@ func (dff *DropdownFormField) WithValue(value interface{}) *DropdownFormField {
 // Build creates the widget tree
 func (dff *DropdownFormField) Build(context goflow.BuildContext) goflow.Widget {
 	// Create dropdown with validation
-	return &Dropdown{
+	return &DropdownButton{
 		Value: dff.Value,
 		Items: dff.Items,
 		OnChanged: func(value interface{}) {
@@ -154,8 +163,8 @@ func (dff *DropdownFormField) Build(context goflow.BuildContext) goflow.Widget {
 				dff.OnChanged(value)
 			}
 		},
-		Hint:    dff.Hint,
-		Enabled: dff.Enabled,
+		Hint: dff.Hint,
+		// Note: DropdownButton doesn't have Enabled field
 	}
 }
 
@@ -173,12 +182,7 @@ type DatePickerFormField struct {
 	fieldState    *FormFieldStateImpl
 }
 
-// Date represents a date
-type Date struct {
-	Year  int
-	Month int
-	Day   int
-}
+// Date is now defined at package level above
 
 // NewDatePickerFormField creates a new date picker form field
 func NewDatePickerFormField() *DatePickerFormField {
@@ -233,11 +237,7 @@ type TimePickerFormField struct {
 	fieldState *FormFieldStateImpl
 }
 
-// TimeOfDay represents a time of day
-type TimeOfDay struct {
-	Hour   int
-	Minute int
-}
+// TimeOfDay is now defined at package level above
 
 // NewTimePickerFormField creates a new time picker form field
 func NewTimePickerFormField() *TimePickerFormField {
@@ -251,7 +251,7 @@ func NewTimePickerFormField() *TimePickerFormField {
 // WithValidator sets the validator
 func (tpff *TimePickerFormField) WithValidator(validator func(*TimeOfDay) *string) *TimePickerFormField {
 	tpff.Validator = validator
-	return tff
+	return tpff
 }
 
 // Build creates the widget tree
